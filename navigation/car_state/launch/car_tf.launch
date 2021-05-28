@@ -1,0 +1,6 @@
+<launch>
+
+    <node name="mapTF" pkg="car_state" type="map_tf" output="screen"/>
+    <node name="odom_tf" pkg="car_state" type="odom_tf" output="screen"/>
+    <node name="car_position" pkg="car_state" type="position"/>
+</launch>

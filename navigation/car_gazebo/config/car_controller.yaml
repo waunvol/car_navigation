@@ -1,0 +1,12 @@
+car_controller:
+  type: "diff_drive_controller/DiffDriveController"
+  left_wheel: ['f_Lwheel_j','r_Lwheel_j']
+  right_wheel: ['f_Rwheel_j','r_Rwheel_j']
+  pose_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
+  twist_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
+
+  # Wheel separation and diameter. These are both optional.
+  # diff_drive_controller will attempt to read either one or both from the
+  # URDF if not specified as a parameter
+  wheel_separation : 0.093
+  wheel_radius : 0.02

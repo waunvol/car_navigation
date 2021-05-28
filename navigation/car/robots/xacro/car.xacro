@@ -1,0 +1,345 @@
+<robot
+  name="car" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find car)/robots/xacro/car.gazebo" />
+
+  <link name="base_footprint">
+      <visual>
+          <geometry>
+                  <box size="0.001 0.001 0.001"/>
+              </geometry>
+          <origin rpy="0 0 0" xyz="-5.98645397950426E-05 0 0"/>
+      </visual>
+  </link>
+  <gazebo reference="base_footprint">
+      <material>Gazebo/Green</material>
+      <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+  <joint name="base_footprint_joint" type="fixed">
+      <origin xyz="0 0 0" />
+      <parent link="base_footprint" />
+      <child link="base_link" />
+  </joint>
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-5.98645397950426E-05 0 -0.00480775540649346"
+        rpy="0 0 0" />
+      <mass
+        value="0.190196938994804" />
+      <inertia
+        ixx="0.000140392533271429"
+        ixy="3.71363647578478E-20"
+        ixz="1.43209463748562E-06"
+        iyy="0.000336958997743863"
+        iyz="-7.440349237934E-21"
+        izz="0.000464519694978226" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="f_Rwheel">
+    <inertial>
+      <origin
+        xyz="-6.93889390390723E-18 -0.00749999999999998 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.0188495559215388" />
+      <inertia
+        ixx="2.23838476568273E-06"
+        ixy="1.14794370197489E-38"
+        ixz="0"
+        iyy="3.76991118430776E-06"
+        iyz="5.46392484019369E-39"
+        izz="2.23838476568273E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/f_Rwheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/f_Rwheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="f_Rwheel_j"
+    type="continuous">
+    <origin
+      xyz="0.059 -0.039 -0.006"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="f_Rwheel" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      effort="10"
+      velocity="100" />
+  </joint>
+  <link
+    name="f_Lwheel">
+    <inertial>
+      <origin
+        xyz="-6.93889390390723E-18 0.00750000000000001 -4.33680868994202E-19"
+        rpy="0 0 0" />
+      <mass
+        value="0.0188495559215388" />
+      <inertia
+        ixx="2.23838476568273E-06"
+        ixy="5.29395592033939E-23"
+        ixz="7.00960440898279E-54"
+        iyy="3.76991118430775E-06"
+        iyz="5.46392484019368E-39"
+        izz="2.23838476568273E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/f_Lwheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/f_Lwheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="f_Lwheel_j"
+    type="continuous">
+    <origin
+      xyz="0.059 0.039 -0.006"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="f_Lwheel" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      effort="10"
+      velocity="100" />
+  </joint>
+  <link
+    name="r_Rwheel">
+    <inertial>
+      <origin
+        xyz="0 -0.00749999999999998 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.0188495559215388" />
+      <inertia
+        ixx="2.23838476568273E-06"
+        ixy="1.14794370197489E-38"
+        ixz="0"
+        iyy="3.76991118430776E-06"
+        iyz="5.46392484019369E-39"
+        izz="2.23838476568273E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/b_Rwheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/b_Rwheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="r_Rwheel_j"
+    type="continuous">
+    <origin
+      xyz="-0.059 -0.039 -0.006"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="r_Rwheel" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      effort="10"
+      velocity="100" />
+  </joint>
+  <link
+    name="r_Lwheel">
+    <inertial>
+      <origin
+        xyz="0 0.00750000000000001 -4.33680868994202E-19"
+        rpy="0 0 0" />
+      <mass
+        value="0.0188495559215388" />
+      <inertia
+        ixx="2.23838476568273E-06"
+        ixy="5.29395592033939E-23"
+        ixz="7.00960440898279E-54"
+        iyy="3.76991118430775E-06"
+        iyz="5.46392484019368E-39"
+        izz="2.23838476568273E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/b_Lwheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/b_Lwheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="r_Lwheel_j"
+    type="continuous">
+    <origin
+      xyz="-0.059 0.039 -0.006"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="r_Lwheel" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      effort="10"
+      velocity="100" />
+  </joint>
+  <link
+    name="lidar">
+    <inertial>
+      <origin
+        xyz="0 0 0.00339338235294118"
+        rpy="0 0 0" />
+      <mass
+        value="0.00341805280710569" />
+      <inertia
+        ixx="1.37678095848722E-07"
+        ixy="2.43294497667159E-23"
+        ixz="-2.11525481719696E-24"
+        iyy="1.37678095848722E-07"
+        iyz="-9.37213591384351E-24"
+        izz="2.22060335126341E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/lidar.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://car/meshes/lidar.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lidar_joint"
+    type="fixed">
+    <origin
+      xyz="-0.015 0 0.03"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="lidar" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      effort="10"
+      velocity="100" />
+  </joint>
+
+</robot>
