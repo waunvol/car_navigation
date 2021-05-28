@@ -34,6 +34,6 @@
     <!-- <include file="$(find official_example)/launch/move_base.launch"/> -->
 
     <!-- launch RVIZ -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find car_description)/car.rviz"/> 
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find car)/car.rviz"/> 
 
 </launch>
