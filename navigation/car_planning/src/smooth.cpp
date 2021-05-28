@@ -62,7 +62,8 @@ vector<pair<float, float>> smooth::PathSmooth(const vector<pair<float, float>> &
     int count = path.size()/10 + 1;     //路径的控制点数量
     float step = 1.0/count;             //步长
 
-    for(float t=0; t<=1; t+=step)
+    float t=0;
+    while(t>=0)//算出每个点的贝塞尔变换
     {
         for(auto it:path)
         {
@@ -71,6 +72,13 @@ vector<pair<float, float>> smooth::PathSmooth(const vector<pair<float, float>> &
         BezierCalculate(path.size()-1, t);
         waypoint.push_back(_queue.front());
         _queue.pop();
+        t+=step;
+        //由于浮点数有精度损失，所以这里必须用这种方法确保有t=1的点
+        if(t>=1)    
+        {
+            t=1;
+            step = -10;     //step为一个小于0的数，确保下次循环执行完毕后跳出
+        }
     }
     
     ROS_INFO("Path-smoothing done!");
