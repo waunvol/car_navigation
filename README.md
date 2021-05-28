@@ -7,7 +7,7 @@
 2. 运行`roslaunch car_gazebo car_gazebo.launch`
 3. 待Gazebo和RVIZ启动完成后，运行`roslaunch car_planning planningNode.launch`
 ## 使用
-1. 使用RVIZ上“2D new goal”给小车指定一个目标，小车便会想目标开始移动
+1. 使用RVIZ界面上“2D Nav Goal”给小车指定一个目标，小车便会向目标开始移动
 2. 绿色路径dijkstra算法寻路结果，蓝色路径为A* 算法寻路结果
 3. 可在小车运动过程指定新的目标点
 ## 详细介绍
