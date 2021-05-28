@@ -5,7 +5,7 @@
 ## 运行
 1. 复制至catkin工作空间的src后编译
 2. 运行`roslaunch car_gazebo car_gazebo.launch`
-3. 待Gazebo和RVIZ启动完成后，运行`roslaunch car_planning planningNode.laucnch`
+3. 待Gazebo和RVIZ启动完成后，运行`roslaunch car_planning planningNode.launch`
 ## 使用
 1. 使用RVIZ上“2D new goal”给小车指定一个目标，小车便会想目标开始移动
 2. 绿色路径dijkstra算法寻路结果，蓝色路径为A* 算法寻路结果
