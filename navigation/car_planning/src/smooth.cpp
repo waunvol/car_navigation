@@ -73,7 +73,7 @@ vector<pair<float, float>> smooth::PathSmooth(const vector<pair<float, float>> &
         waypoint.push_back(_queue.front());
         _queue.pop();
         t+=step;
-        //由于浮点数有精度损失，所以这里必须用这种方法确保有t=1的点
+        //由于浮点数有精度损失，所以这里必须用这种方法确保有t=1
         if(t>=1)    
         {
             t=1;

@@ -11,11 +11,10 @@
 
 using namespace std;
 
-class PathPlanning
+class costmap
 {
 private:
     void rebound(int index,int operation, int threshold);            //遇到障碍物后反弹铺COST格
-
 
 public:
     double original_x, original_y, resolution;
@@ -27,12 +26,12 @@ public:
     string frame_id, topicName;                      //地图frame ID
     vector<int8_t> COST;                  //记录地图的cost
 
-    PathPlanning():InterferenceArea(0.25), Multiple(1.0), topicName("static_map")
+    costmap():InterferenceArea(0.25), Multiple(1.0), topicName("static_map")
     {
-        
+        init();
     }
 
-    virtual ~PathPlanning()
+    virtual ~costmap()
     {
 
     }
@@ -65,8 +64,6 @@ public:
         InterferenceArea = interference;
         Multiple = multiple;
     }
-    
-    virtual void calculatePotential(float start_x, float start_y, vector<pair<float, float>> destination, int* potential)=0;
 
     void testFun();
 };

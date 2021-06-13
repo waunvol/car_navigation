@@ -1,7 +1,10 @@
 #include "astar.h"
 
-void astar::calculatePotential(float start_x, float start_y, vector<pair<float, float>> destination, int* potential)
+bool astar::calculatePotential(float start_x, float start_y, vector<pair<float, float>> destination, int* potential)
 {
+    if(!CheckCostMap())
+        return false;
+
     //potential初始化
     std::fill(potential, potential + wid*hig, 65536);
     
@@ -41,10 +44,11 @@ void astar::calculatePotential(float start_x, float start_y, vector<pair<float, 
         if(!count)//搜索失败
         {
             ROS_ERROR("Astar cant find solution! Please try anthor point");
-            return;
+            return false;
         }
     }
     ROS_INFO("Astar done!");
+    return true;
 }
 
 
@@ -53,12 +57,12 @@ void astar::addQueue(int before ,int now, double endx, double endy, int* potenti
     //对当前传入的点进行计算优先度等操作
     if((before/wid!=now/wid && (abs(before-now)!=wid)) || now<0 || now>wid*hig)//边界条件
         return;
-    if(COST.at(now) >= 70 || COST[now]<=0 )
+    if((*COST)[now] >= 70 || (*COST)[now]<=0 )
         return;
     if (potential[now]<65536)
         return;
 
-    int distance = COST.at(now) + potential[before];
+    int distance = (*COST)[now] + potential[before];
 
     potential[now] = distance;
     float cost_ = potential[now]+MHTdistance(now, endx, endy);

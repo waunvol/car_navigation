@@ -2,8 +2,11 @@
 
 
 
-void dijkstra::calculatePotential(float start_x, float start_y, vector<pair<float, float>> destination, int* potential)
+bool dijkstra::calculatePotential(float start_x, float start_y, vector<pair<float, float>> destination, int* potential)
 {
+    if(!CheckCostMap())
+        return false;
+
     vector<int> goal;
     for(auto it=destination.begin(); it!=destination.end(); it++ )
     {
@@ -74,7 +77,7 @@ void dijkstra::calculatePotential(float start_x, float start_y, vector<pair<floa
             if(!Bound_v)
                 pot_v = (potential[curBUFF[i] - wid] <= potential[curBUFF[i] + wid]) ? potential[curBUFF[i] - wid] : potential[curBUFF[i] + wid];
             
-            int pot = ((pot_h <= pot_v)?pot_h: pot_v) + COST[curBUFF[i]];    //取得最小值
+            int pot = ((pot_h <= pot_v)?pot_h: pot_v) + (*COST)[curBUFF[i]];    //取得最小值
 
             
 
@@ -82,13 +85,13 @@ void dijkstra::calculatePotential(float start_x, float start_y, vector<pair<floa
             {
                 potential[curBUFF[i]] = pot;
                 //COST值符合才会加入下一轮迭代
-                if (COST[curBUFF[i]-1]<60 && COST[curBUFF[i]-1]>0 && potential[curBUFF[i]-1] > pot + COST[curBUFF[i]-1] && pending[curBUFF[i]-1]==false)
+                if ((*COST)[curBUFF[i]-1]<60 && (*COST)[curBUFF[i]-1]>0 && potential[curBUFF[i]-1] > pot + (*COST)[curBUFF[i]-1] && pending[curBUFF[i]-1]==false)
                     pushNext(curBUFF[i]-1);
-                if (COST[curBUFF[i]+1]<60 && COST[curBUFF[i]+1]>0 && potential[curBUFF[i]+1] > pot + COST[curBUFF[i]+1] && pending[curBUFF[i]+1]==false)
+                if ((*COST)[curBUFF[i]+1]<60 && (*COST)[curBUFF[i]+1]>0 && potential[curBUFF[i]+1] > pot + (*COST)[curBUFF[i]+1] && pending[curBUFF[i]+1]==false)
                     pushNext(curBUFF[i]+1);
-                if (COST[curBUFF[i]-wid]<60 && COST[curBUFF[i]-wid]>0 && potential[curBUFF[i]-wid] > pot + COST[curBUFF[i]-wid] && pending[curBUFF[i]-wid]==false)
+                if ((*COST)[curBUFF[i]-wid]<60 && (*COST)[curBUFF[i]-wid]>0 && potential[curBUFF[i]-wid] > pot + (*COST)[curBUFF[i]-wid] && pending[curBUFF[i]-wid]==false)
                     pushNext(curBUFF[i]-wid);
-                if (COST[curBUFF[i]+wid]<60 && COST[curBUFF[i]+wid]>0 && potential[curBUFF[i]+wid] > pot + COST[curBUFF[i]+wid] && pending[curBUFF[i]+wid]==false)
+                if ((*COST)[curBUFF[i]+wid]<60 && (*COST)[curBUFF[i]+wid]>0 && potential[curBUFF[i]+wid] > pot + (*COST)[curBUFF[i]+wid] && pending[curBUFF[i]+wid]==false)
                     pushNext(curBUFF[i]+wid);
             }
 
@@ -104,10 +107,10 @@ void dijkstra::calculatePotential(float start_x, float start_y, vector<pair<floa
         if(complete(goal, potential))
         {
             ROS_INFO("Dijikstra done!");
-            break;
+            return true;
         }
     }
-
+    return false;
 }
 
 bool dijkstra::complete(vector<int> goal, int* potential)

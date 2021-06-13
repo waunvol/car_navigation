@@ -104,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+ INCLUDE_DIRS include
 #  LIBRARIES car_planning
 #  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs
 #  DEPENDS system_lib
@@ -117,8 +117,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
   include/car_planning
+  # include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -126,7 +126,11 @@ add_library(costmap include/car_planning/cost.h src/cost.cpp)
 add_dependencies(costmap ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(costmap ${catkin_LIBRARIES})
 
-add_library(Dijkstra_ include/car_planning/dijkstra.h src/dijkstra.cpp)
+# add_library(PathPlanning include/car_planning/PathPlanning.h)
+# add_dependencies(PathPlanning ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(PathPlanning ${catkin_LIBRARIES})
+
+add_library(Dijkstra_ src/dijkstra.cpp)
 add_dependencies(Dijkstra_ ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(Dijkstra_ costmap ${catkin_LIBRARIES})
 

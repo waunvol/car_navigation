@@ -70,14 +70,10 @@ void show(int* array,  int index_, int area_, int width)
     }
 }
 
-
-
-
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "PlanningNode");
     ros::NodeHandle n;
- 
 
     vector<int8_t> *cost;
     vector<pair<float, float>> goals;
@@ -88,15 +84,15 @@ int main(int argc, char** argv)
     nav_msgs::Path pathMSG_D;
 
     pair<float, float> starting;
+    costmap cost_1;
+    cost_1.calculateCOST();
 
     astar A;
-    A.init();
-    A.calculateCOST();
+    A.setCostMap(cost_1.hig, cost_1.wid, &cost_1.COST);
     potential_A = new int[A.GetMapSize()];
 
     dijkstra D;
-    D.init();
-    D.calculateCOST();
+    D.setCostMap(cost_1.hig, cost_1.wid, &cost_1.COST);
     potential_D = new int[D.GetMapSize()];
 
     //get goal
@@ -106,14 +102,13 @@ int main(int argc, char** argv)
 
     ros::Publisher pathpub_A = n.advertise<nav_msgs::Path>("Astar_path",3);
     ros::Publisher pathpub_D = n.advertise<nav_msgs::Path>("Dijkstra_path",3);
-    // ros::Subscriber OdemSub = n.subscribe("odem", 1, getPosition);
+
     ros::Rate r(100);
     ROS_INFO("now start!");
     while (ros::ok())
     {
         r.sleep();
         ros::spinOnce();
-
 
         if(rec_flag)
         {
@@ -127,15 +122,12 @@ int main(int argc, char** argv)
             paths_A.at(0) = plan.PathSmooth(paths_A.at(0));
             pathMSG_A = getPathMsg(paths_A.at(0));
 
-             
-
             D.calculatePotential(starting.first, starting.second, goals, potential_D);
             gradient path_D(D.wid, D.hig);
             path_D.calculatePath(potential_D, starting.first, starting.second, goals, paths_d);
-            
+
             paths_d.at(0) = plan.PathSmooth(paths_d.at(0));
             pathMSG_D = getPathMsg(paths_d.at(0));
-
 
 /*          直接根据potential列出路径
             ros::Time time0 = ros::Time::now();
@@ -185,14 +177,11 @@ int main(int argc, char** argv)
                 pose.pose.orientation.z=0;
                 pathMSG.poses.push_back(pose);
             }*/
-            
             rec_flag = false;
 
             pathpub_A.publish(pathMSG_A);
             pathpub_D.publish(pathMSG_D);
             r.sleep();
-
-            
         }
         paths_A.clear();
         paths_d.clear();

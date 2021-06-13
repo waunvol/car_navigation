@@ -4,6 +4,7 @@
 #include "cost.h"
 #include <queue>
 #include <algorithm>
+#include "PathPlanning.h"
 
 class Index {
     public:
@@ -38,7 +39,7 @@ private:
     void addQueue(int before ,int now, double endx, double endy, int* potential);
 
 public:
-    void calculatePotential(float start_x, float start_y, vector<pair<float, float>> destination, int* potential);
+    bool calculatePotential(float start_x, float start_y, vector<pair<float, float>> destination, int* potential);
 };
 
 

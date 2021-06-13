@@ -2,7 +2,7 @@
 
 
 
-void PathPlanning::init()
+void costmap::init()
 {
     ros::NodeHandle n;
     nav_msgs::GetMap mapRev;
@@ -10,7 +10,7 @@ void PathPlanning::init()
 
     if(Mapsrv.call(mapRev))
     {
-        ROS_INFO("server has been connectted!");
+        ROS_INFO("Mapserver has been connectted!");
     }
     else
     {
@@ -21,7 +21,7 @@ void PathPlanning::init()
     //获得起始点
     original_x = mapRev.response.map.info.origin.position.x*(-1);
     original_y = mapRev.response.map.info.origin.position.y*(-1);   
-    ROS_INFO("%f, %f", mapRev.response.map.info.origin.position.x, mapRev.response.map.info.origin.position.y); 
+    // ROS_INFO("%f, %f", mapRev.response.map.info.origin.position.x, mapRev.response.map.info.origin.position.y); 
     //获得初始的COST值 
     // *COST = mapRev.response.map.data;   
     //默认模式下，free的cost值为0，未知为-1，不可到达为100    
@@ -45,7 +45,7 @@ void PathPlanning::init()
 
 //向除了有障碍物方向扩散
 
-void PathPlanning::rebound(int index,int operation, int threshold)
+void costmap::rebound(int index,int operation, int threshold)
 {
     if (threshold <= 50)
         return;
@@ -76,7 +76,7 @@ void PathPlanning::rebound(int index,int operation, int threshold)
 }
 
 
-void PathPlanning::calculateCOST()
+void costmap::calculateCOST()
 {
     origin = GetIndex(original_x, original_y);
     int *curBUFF = new int[wid*hig*4];
@@ -154,7 +154,7 @@ void PathPlanning::calculateCOST()
     ROS_INFO("COST map done!");
 }
 
-void PathPlanning::testFun()    //测试读数
+void costmap::testFun()    //测试读数
 {
     cout<<"width:"<<wid<<endl;
     cout<<"hight:"<<hig<<endl;

@@ -2,6 +2,7 @@
 #define DIJKSTRA_H
 
 #include "cost.h"
+#include "PathPlanning.h"
 
 #define pushCur(n)             \
     {                          \
@@ -20,7 +21,7 @@ private:
     bool complete(vector<int> goal, int* potential);//判断是否已完成所有点搜索
 
 public:
-    void calculatePotential(float start_x, float start_y, vector<pair<float, float>> destination, int* potential);
+    bool calculatePotential(float start_x, float start_y, vector<pair<float, float>> destination, int* potential);
 
 
 
