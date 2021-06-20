@@ -26,14 +26,19 @@ public:
     string frame_id, topicName;                      //地图frame ID
     vector<int8_t> COST;                  //记录地图的cost
 
-    costmap():InterferenceArea(0.25), Multiple(1.0), topicName("static_map")
+    costmap():InterferenceArea(0.225), Multiple(1.0), topicName("static_map")
     {
         init();
     }
 
     virtual ~costmap()
     {
+        
+    }
 
+    int getCOST(float x, float y)
+    {
+        return COST[GetIndex(x,y)];
     }
 
     void calculateCOST();

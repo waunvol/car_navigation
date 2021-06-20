@@ -94,51 +94,68 @@ void costmap::calculateCOST()
     curBUFF[++curPTR] = origin+wid;
     curBUFF[++curPTR] = origin-wid;
     // ROS_INFO("cost %d", COST.size());
+    
     while (curPTR!=0)
     {
         //先遍历curbuff，在过程中将新加入的加入nextbuff
         //判断curbuff中的格子周围4个，符合条件则加入nextbuff（不为-1，不超界）
         int i = curPTR;
-
-        while (i && !pending[curBUFF[i]])
+        float step = 50/(InterferenceArea/(0.05*Multiple));
+        while (i)
         {
             // ROS_INFO("%d", i);
             // 未检索 && 不超界 
             if(!pending[curBUFF[i]-1] && (curBUFF[i]-1)%wid<curBUFF[i]%wid)
             {
-                // ROS_INFO("a %d", (curBUFF[i]-1));
-                if (COST.at(curBUFF[i]-1)==100)
+                if (COST[curBUFF[i]-1]==100)
                 {
-                    rebound(curBUFF[i], left_obstacle, 99); //左侧为障碍，反弹至右侧
+                    COST[curBUFF[i]]=99;
+                    rebound(curBUFF[i], left_obstacle, 99-step); //左侧为障碍，反弹至右侧
                 }
-                else nextBUFF[++nextPTR]=curBUFF[i]-1;
+                else 
+                {
+                    nextBUFF[++nextPTR]=curBUFF[i]-1;
+                    pending[curBUFF[i]-1] = true;
+                }
             }
             if(!pending[curBUFF[i]+1] && (curBUFF[i]+1)%wid>curBUFF[i]%wid)
             {
-                // ROS_INFO("b %d", i);
-                if (COST.at(curBUFF[i]+1)==100)
+                if (COST[curBUFF[i]+1]==100)
                 {
-                    rebound(curBUFF[i], right_obstacle, 99); //右侧为障碍，反弹至左侧
+                    COST[curBUFF[i]]=99;
+                    rebound(curBUFF[i], right_obstacle, 99-step); //右侧为障碍，反弹至左侧
                 }   
-                else nextBUFF[++nextPTR]=curBUFF[i]+1;
+                else 
+                {
+                    nextBUFF[++nextPTR]=curBUFF[i]+1;
+                    pending[curBUFF[i]+1] = true;
+                }
             }
             if(!pending[curBUFF[i]-wid] && curBUFF[i]-wid>=0)
             {
-                // ROS_INFO("c %d", i);
-                if (COST.at(curBUFF[i]-wid)==100)
+                if (COST[curBUFF[i]-wid]==100)
                 {
-                    rebound(curBUFF[i], up_obstacle, 99); //上侧为障碍，反弹至下侧
+                    COST[curBUFF[i]]=99;
+                    rebound(curBUFF[i], up_obstacle, 99-step); //上侧为障碍，反弹至下侧
                 }
-                else nextBUFF[++nextPTR]=curBUFF[i]-wid;
+                else 
+                {
+                    nextBUFF[++nextPTR]=curBUFF[i]-wid;
+                    pending[curBUFF[i]-wid] = true;
+                }
             }
             if(!pending[curBUFF[i]+wid] && curBUFF[i]+wid<=wid*hig)
             {
-                // ROS_INFO("d %d", i);
-                if (COST.at(curBUFF[i]+wid)==100)
+                if (COST[curBUFF[i]+wid]==100)
                 {
-                    rebound(curBUFF[i], down_obstacle, 99); //下侧为障碍，反弹至上侧
+                    COST[curBUFF[i]]=99;
+                    rebound(curBUFF[i], down_obstacle, 99-step); //下侧为障碍，反弹至上侧
                 }
-                else nextBUFF[++nextPTR]=curBUFF[i]+wid;
+                else 
+                {
+                    nextBUFF[++nextPTR]=curBUFF[i]+wid;
+                    pending[curBUFF[i]+wid] = true;
+                }
             }
             pending[curBUFF[i]] = true;
             i--;
@@ -152,6 +169,8 @@ void costmap::calculateCOST()
         nextPTR = 0;
     }
     ROS_INFO("COST map done!");
+    delete curBUFF;
+    delete nextBUFF;
 }
 
 void costmap::testFun()    //测试读数
