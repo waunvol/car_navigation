@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(car_planning_2)
-SET(CMAKE_BUILD_TYPE Debug) 
+project(car_navigation)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -13,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  car_planning
 )
 
 ## System dependencies are found with CMake's conventions
@@ -107,7 +105,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES car_planning_2
+#  LIBRARIES car_navigation
 #  CATKIN_DEPENDS nav_msgs roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -120,34 +118,26 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  include/car_planning
-  include/car_planning_2
+  include/car_navigation
   ${catkin_INCLUDE_DIRS}
 )
+add_library(dijkstra include/car_navigation/Dijkstra.h src/Dijkstra.cpp)
+add_dependencies(dijkstra ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(dijkstra ${catkin_LIBRARIES})
 
-add_library(reedsShepp include/car_planning_2/rs_path.h src/rs_path.cpp)
-add_dependencies(reedsShepp ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(reedsShepp ${catkin_LIBRARIES})
+add_library(astar include/car_navigation/Astar.h src/Astar.cpp)
+add_dependencies(astar ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(astar dijkstra ${catkin_LIBRARIES})
 
-add_library(hybridAstar include/car_planning_2/hybridAstar.h src/hybridAstar.cpp)
-add_dependencies(hybridAstar ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(hybridAstar reedsShepp ${catkin_LIBRARIES})
+add_executable(testfn src/test.cpp)
+add_dependencies(testfn ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(testfn astar dijkstra ${catkin_LIBRARIES})
 
-add_library(RRT include/car_planning_2/RRT.h src/RRT.cpp)
-add_dependencies(RRT ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(RRT ${catkin_LIBRARIES})
-
-add_executable(showPath src/showPath.cpp)
-add_dependencies(showPath ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(showPath costmap hybridAstar RRT ${catkin_LIBRARIES})
-
-# add_executable(PlanNode include/car_planning/PlanningNode.h src/PlanningNode.cpp)
-# add_dependencies(PlanNode ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(PlanNode gradient costmap Astar_ Dijkstra_ smooth ${catkin_LIBRARIES})
+SET(CMAKE_BUILD_TYPE Debug) #调试
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/car_planning_2.cpp
+#   src/${PROJECT_NAME}/car_navigation.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -158,7 +148,7 @@ target_link_libraries(showPath costmap hybridAstar RRT ${catkin_LIBRARIES})
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/car_planning_2_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/car_navigation_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -222,7 +212,7 @@ target_link_libraries(showPath costmap hybridAstar RRT ${catkin_LIBRARIES})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_car_planning_2.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_car_navigation.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

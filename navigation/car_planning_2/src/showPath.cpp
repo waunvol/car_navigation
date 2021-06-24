@@ -2,6 +2,7 @@
 #include "hybridAstar.h"
 #include <nav_msgs/Path.h>
 #include "car_planning/cost.h"
+#include "RRT.h"
 #include "tf/transform_datatypes.h"
 
 using namespace std;
@@ -80,18 +81,25 @@ int main(int argc, char **argv)
     ros::Subscriber GetPosition = n.subscribe<geometry_msgs::Pose>("car_position", 1, boost::bind(&getPosition, _1, &starting));
     // ros::Subscriber costpub = n.subscribe<geometry_msgs::PointStamped>("clicked_point", 1, boost::bind(&showCOST, _1, &co));
     ros::Publisher pathpub_A = n.advertise<nav_msgs::Path>("hybridAstar",3);
+    ros::Publisher pathpub_R = n.advertise<nav_msgs::Path>("RRT",3);
 
     costmap cost_ha;
     cost_ha.setInterferenceArea(0.12, 1.0);
     cost_ha.calculateCOST();
 
+    //混合A* 设置
     hybridAstar plan_1;
     plan_1.setCOST(cost_ha.hig, cost_ha.wid, &cost_ha.COST);
+
+    //RRT 设置
+    RRT_planner plan_2;
+    plan_2.setCOSTMAP(cost_ha.hig, cost_ha.wid, &cost_ha.COST);
 
     ros::Rate r(100);
     ROS_INFO("now start!");
 
-    nav_msgs::Path Pmsg;
+    nav_msgs::Path Amsg;    //
+    nav_msgs::Path Rmsg;
 
     while (ros::ok())
     {
@@ -107,14 +115,23 @@ int main(int argc, char **argv)
         {
             rec_flag = false;
             ROS_INFO("Got new goal!");
-            vector<vector<float>> route;
-            if(plan_1.calculateRoute(&starting, &goals))           
-                route = plan_1.getRoute();
-            else continue;
+            vector<vector<float>> route_1;
+            vector<vector<float>> route_2;
+            if(plan_1.calculateRoute(&starting, &goals)) 
+            {          
+                route_1 = plan_1.getRoute();
+                Amsg = getPath(route_1);
+                pathpub_A.publish(Amsg);
+            }
+            if(plan_2.searchRoute(&starting, &goals))
+            {
+                route_2 = plan_2.getRoute();
+                Rmsg = getPath(route_2);
+                pathpub_R.publish(Rmsg);
+            }
 
-            Pmsg = getPath(route);
-            pathpub_A.publish(Pmsg);
-            route.clear();
+            route_1.clear();
+            route_2.clear();
             r.sleep();
         }
 

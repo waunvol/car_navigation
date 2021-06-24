@@ -44,7 +44,7 @@ private:
     bool CheckObstacle(float x, float y);
     //获得随机点       
     std::pair<float, float> getRandomPoint();   
-    void addPoint(waypoint* nearest, const std::pair<float, float> &target);
+    void addPoint(waypoint** nearest, const std::pair<float, float> &target);
     //释放空间
     void free();                                
     
