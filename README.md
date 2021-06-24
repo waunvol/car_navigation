@@ -2,6 +2,10 @@
 本项目在ROS（机器人操作系统）的基础上，在gazebo上进行的一个运动规划的仿真实验。其中Astar和dijkstra算法是依据官方github源码的思想来写（因为写的很好。。），其他均为自行编写。
 
 展示视频：<https://www.bilibili.com/video/BV1v54y1V7qV>
+
+##UPDATE
+2021.6.24 新增了混合A* 和 RRT 两种算法的粗路径搜索，详见 `navigation/car_planning_2`
+
 ## 运行
 1. 复制至catkin工作空间的src后编译
 2. 运行`roslaunch car_gazebo car_gazebo.launch`
