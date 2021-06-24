@@ -3,7 +3,7 @@
 
 展示视频：<https://www.bilibili.com/video/BV1v54y1V7qV>
 
-##UPDATE
+## UPDATE
 2021.6.24 新增了混合A* 和 RRT 两种算法的粗路径搜索，详见 `navigation/car_planning_2`
 
 ## 运行
