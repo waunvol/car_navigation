@@ -1,4 +1,0 @@
-<launch>
-    <node name="showPath" pkg="car_planning_2" type="showPath" output="screen"/>
-
-</launch>
