@@ -4,7 +4,7 @@
 展示视频：<https://www.bilibili.com/video/BV1v54y1V7qV>
 
 ## UPDATE
-2021.6.24 新增了混合A* 和 RRT 两种算法的粗路径搜索，详见 `navigation/car_planning_2`
+2021.6.24 新增了混合A* 和 RRT 两种算法的路径搜索，详见 `navigation/car_planning_2`
 
 ## 运行
 1. 复制至catkin工作空间的src后编译
