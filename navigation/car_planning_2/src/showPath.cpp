@@ -4,6 +4,7 @@
 #include "car_planning/cost.h"
 #include "RRT.h"
 #include "tf/transform_datatypes.h"
+#include "steepest.h"
 
 using namespace std;
 
@@ -83,6 +84,8 @@ int main(int argc, char **argv)
     ros::Publisher pathpub_A = n.advertise<nav_msgs::Path>("hybridAstar",3);
     ros::Publisher pathpub_R = n.advertise<nav_msgs::Path>("RRT",3);
 
+    // ros::Publisher pathpub_R_2 = n.advertise<nav_msgs::Path>("steep",3);
+
     costmap cost_ha;
     cost_ha.setInterferenceArea(0.12, 1.0);
     cost_ha.calculateCOST();
@@ -98,8 +101,9 @@ int main(int argc, char **argv)
     ros::Rate r(100);
     ROS_INFO("now start!");
 
-    nav_msgs::Path Amsg;    //
+    nav_msgs::Path Amsg;    
     nav_msgs::Path Rmsg;
+    // nav_msgs::Path Rmsg_2;
 
     while (ros::ok())
     {
@@ -117,8 +121,8 @@ int main(int argc, char **argv)
             ROS_INFO("Got new goal!");
             vector<vector<float>> route_1;
             vector<vector<float>> route_2;
-            if(plan_1.calculateRoute(&starting, &goals)) 
-            {          
+            if(plan_1.calculateRoute(&starting, &goals))
+            {
                 route_1 = plan_1.getRoute();
                 Amsg = getPath(route_1);
                 pathpub_A.publish(Amsg);
@@ -126,10 +130,20 @@ int main(int argc, char **argv)
             if(plan_2.searchRoute(&starting, &goals))
             {
                 route_2 = plan_2.getRoute();
+                // Rmsg = getPath(route_2);
+                // pathpub_R.publish(Rmsg);
+
+                //梯度下降优化路径
+                steepest exp;
+                // route_2 = exp.steepest_descent(40, route_2);
+                // Rmsg_2 = getPath(route_2);
+                // pathpub_R_2.publish(Rmsg_2);
+
+                route_2 = exp.steepest_descent(40, route_2);
                 Rmsg = getPath(route_2);
                 pathpub_R.publish(Rmsg);
-            }
 
+            }
             route_1.clear();
             route_2.clear();
             r.sleep();

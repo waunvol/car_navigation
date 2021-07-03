@@ -137,9 +137,13 @@ add_library(RRT include/car_planning_2/RRT.h src/RRT.cpp)
 add_dependencies(RRT ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(RRT ${catkin_LIBRARIES})
 
+add_library(steepest include/car_planning_2/steepest.h src/steepest.cpp)
+add_dependencies(steepest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(steepest ${catkin_LIBRARIES})
+
 add_executable(showPath src/showPath.cpp)
 add_dependencies(showPath ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(showPath costmap hybridAstar RRT ${catkin_LIBRARIES})
+target_link_libraries(showPath costmap hybridAstar steepest RRT ${catkin_LIBRARIES})
 
 # add_executable(PlanNode include/car_planning/PlanningNode.h src/PlanningNode.cpp)
 # add_dependencies(PlanNode ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
