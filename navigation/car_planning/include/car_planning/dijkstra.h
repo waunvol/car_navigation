@@ -1,5 +1,5 @@
 #ifndef DIJKSTRA_H_
-#define DIJKSTRA_H
+#define DIJKSTRA_H_
 
 #include "cost.h"
 #include "PathPlanning.h"
