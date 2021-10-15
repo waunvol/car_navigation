@@ -1,5 +1,6 @@
 # 简介
 本项目在ROS（机器人操作系统）的基础上，在gazebo上进行的一个运动规划的仿真实验。其中Astar和dijkstra算法是依据官方github源码的思想来写（因为写的很好。。），其他均为自行编写。
+项目依赖与xacro, robot state publisher等一些功能包(安装ros的时候是full-install一般运行不会有问题)，还需要安装gazebo不然模型跑不起来
 
 展示视频：<https://www.bilibili.com/video/BV1v54y1V7qV>
 
