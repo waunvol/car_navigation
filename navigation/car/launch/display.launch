@@ -17,10 +17,10 @@
   <node
     name="robot_state_publisher"
     pkg="robot_state_publisher"
-    type="state_publisher" />
+    type="robot_state_publisher" />
   <node
     name="rviz"
     pkg="rviz"
     type="rviz"
-    args="-d $(find car)/urdf.rviz" />
+    args="-d $(find car)/car.rviz" />
 </launch>

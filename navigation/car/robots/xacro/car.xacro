@@ -8,13 +8,9 @@
           <geometry>
                   <box size="0.001 0.001 0.001"/>
               </geometry>
-          <origin rpy="0 0 0" xyz="-5.98645397950426E-05 0 0"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
       </visual>
   </link>
-  <gazebo reference="base_footprint">
-      <material>Gazebo/Green</material>
-      <turnGravityOff>false</turnGravityOff>
-  </gazebo>
   <joint name="base_footprint_joint" type="fixed">
       <origin xyz="0 0 0" />
       <parent link="base_footprint" />
