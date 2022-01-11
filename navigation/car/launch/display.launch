@@ -6,7 +6,7 @@
     default="False" />
   <param
     name="robot_description"
-    textfile="$(find car)/robots/car.urdf" />
+    textfile="$(find car)/robots/xacro/car.xacro" />
   <param
     name="use_gui"
     value="$(arg gui)" />
