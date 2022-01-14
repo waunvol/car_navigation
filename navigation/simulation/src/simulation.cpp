@@ -3,46 +3,61 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Twist.h>
 
-tf::TransformBroadcaster br;
-tf::Transform transform;
+// simple simulator
+// to do: add accleration limitation. (both angular and linear)
 
-geometry_msgs::Pose cur_pose;
+geometry_msgs::Twist cur_speed;
 
 void SpeedListener(const geometry_msgs::Twist msg) {
-    tf::Quaternion quat;
-    tf::quaternionMsgToTF(cur_pose.orientation, quat);
-
-    double angle = quat.getAngle();
-
-    angle += msg.angular.z*0.02;
-    cur_pose.position.x += msg.linear.x*0.02;
-    cur_pose.position.y += msg.linear.y*0.02;
-
-    cur_pose.orientation = tf::createQuaternionMsgFromYaw(angle);
-    
-    transform.setRotation(tf::Quaternion(cur_pose.orientation.x,cur_pose.orientation.y, cur_pose.orientation.z,cur_pose.orientation.w));
-    transform.setOrigin(tf::Vector3(cur_pose.position.x,cur_pose.position.y,cur_pose.position.z));
-    br.sendTransform(tf::StampedTransform(transform,ros::Time::now(), "world", "base_footprint"));
+    cur_speed = msg;
 }
 
-
-
+// tf should be push actively
+// speed should be subscribe
+// speed should send to tf br
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "car_tf_broadcaster");
     ros::NodeHandle n;
 
-    ros::Subscriber sub = n.subscribe("cmd", 1000, SpeedListener);
-    cur_pose.orientation.w =1;
+    ros::Subscriber speed_listener = n.subscribe("car/cmd", 1000, SpeedListener);
+    tf::TransformBroadcaster br;
+    
 
-    double x,y = 0.0;
-    double yaw = 0;
+    geometry_msgs::Pose cur_pose;
+    cur_pose.orientation.w =1;  //init current pose.
 
     ros::Rate r(50);
+    while(ros::ok()) {
+        ros::spinOnce();
 
-    ros::Subscriber speed_listener;
+        //  convertion between yaw angle and quaternion.
+        tf::Transform transform;
 
-    ros::spin();
+        tf::Pose pose;
+        tf::poseMsgToTF(cur_pose, pose);
+        double yaw = tf::getYaw(pose.getRotation());
+
+        tf::Quaternion q;
+        q.setRPY(0,0,yaw + cur_speed.angular.z*0.02);
+        tf::quaternionTFToMsg(q, cur_pose.orientation);
+
+        cur_pose.position.x += cur_speed.linear.x*0.02*cos(yaw);
+        cur_pose.position.y += cur_speed.linear.x*0.02*sin(yaw);
+
+        transform.setRotation(q);
+        transform.setOrigin(tf::Vector3(cur_pose.position.x,cur_pose.position.y,cur_pose.position.z));
+        br.sendTransform(tf::StampedTransform(transform,ros::Time::now(), "world", "base_footprint"));
+
+        ROS_INFO("cur_pos:%f,%f,%f ,%f,%f,%f,%f!",cur_pose.position.x,
+                                                cur_pose.position.y,
+                                                cur_pose.position.z,
+                                                cur_pose.orientation.x,
+                                                cur_pose.orientation.y,
+                                                cur_pose.orientation.z,
+                                                cur_pose.orientation.w);
+        r.sleep();
+    }
     return 0;
 };
 
