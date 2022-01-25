@@ -4,83 +4,64 @@
 
 using namespace std;
 
-
-//逐层递归，一层一阶
-void smooth::BezierCalculate_(int level, float t)//level:阶数，t：贝塞尔曲线公式中的原版t
+pair<float,float> smooth::BezierSingalPointCalculate(int order, float t, queue<pair<float, float>> ctrl_pt)
 {
-    if(_queue.size()==1)    //结束条件
-        return;
-
-    pair<float, float> tmp;
-    int count=0;
-    while (level-count)
+    while(order>0)
     {
-        pair<float, float> f_p = _queue.front();  //提取控制点
-        _queue.pop();       //移出队列
-        pair<float, float> r_p = _queue.front();
-
-        tmp.first = (f_p.first*(1-t) + r_p.first*t);    //计算次阶控制点
-        tmp.second = (f_p.second*(1-t) + r_p.second*t);
-        _queue.push(tmp);   //加入队列
-
-        count++;
-    }
-    _queue.pop();   //处理玩当前层时，需要将所有此层元素清空
-    BezierCalculate_(level-1, t);
-
-    return;
-}
-
-//解递归
-void smooth::BezierCalculate(int level, float t)
-{
-    while(_queue.size()!=1)
-    {
+        int cnt =0;
         pair<float, float> tmp;
-        int count=0;
-        while (level-count)
+        while (order - cnt)
         {
-            pair<float, float> f_p = _queue.front();  //提取控制点
-            _queue.pop();       //移出队列
-            pair<float, float> r_p = _queue.front();
+            // get a control point from every two points
+            pair<float,float> f_p = ctrl_pt.front();
+            ctrl_pt.pop();
+            pair<float,float> r_p = ctrl_pt.front();
+            tmp = {f_p.first*(1-t) + r_p.first*t, 
+                    f_p.second*(1-t) + r_p.second*t};
+            ctrl_pt.push(tmp);  // push into queue for next level
 
-            tmp.first = (f_p.first*(1-t) + r_p.first*t);    //计算次阶控制点
-            tmp.second = (f_p.second*(1-t) + r_p.second*t);
-            _queue.push(tmp);   //加入队列
-
-            count++;
+            cnt++;
         }
-        _queue.pop();   //处理玩当前层时，需要将所有此层元素清空
-        level--;
+        ctrl_pt.pop();  // clear last rear control point
+        
+        order--;
     }
+    return ctrl_pt.front();
 }
 
-vector<pair<float, float>> smooth::PathSmooth(const vector<pair<float, float>> &path)
+
+vector<pair<float, float>> smooth::PathSmooth(int order ,const vector<pair<float, float>> &path)
 {
     vector<pair<float, float>> waypoint;
 
-    int count = path.size()/10 + 1;     //路径的控制点数量
-    float step = 1.0/count;             //步长
-
-    float t=0;
-    while(t>=0)//算出每个点的贝塞尔变换
+    for(size_t i=0;; )
     {
-        for(auto it:path)
+        queue<pair<float,float>> tmp;
+        for(size_t j=0; j<=order; j++) 
         {
-            _queue.push(it);
+            tmp.push(path[i+j]);
         }
-        BezierCalculate(path.size()-1, t);
-        waypoint.push_back(_queue.front());
-        _queue.pop();
-        t+=step;
-        //由于浮点数有精度损失，所以这里必须用这种方法确保有t=1
-        if(t>=1)    
+        
+        float step = 1.0/order;
+        for(float t=0; t<1-step/2; t+=step) // abort the last point
         {
-            t=1;
-            step = -10;     //step为一个小于0的数，确保下次循环执行完毕后跳出
+            waypoint.push_back(BezierSingalPointCalculate(order, t, tmp));
         }
+        
+
+        i+=order;
+        if( i>=path.size()) // for the rest path
+        {
+            step = 1.0/(path.size()-i+order);
+            for(float t=0; t<1; t+=step)    // end point do not abort
+            {
+                waypoint.push_back(BezierSingalPointCalculate(order, t, tmp));
+            }
+            break;
+        }
+
     }
-    
+
     ROS_INFO("Path-smoothing done!");
     return waypoint;
 }

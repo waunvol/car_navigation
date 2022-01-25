@@ -40,6 +40,8 @@ bool hybridAstar::calculateRoute(const vector<float> *start, const vector<float>
 {
     Pending.resize(wid * hig, nullptr);
 
+    // Should find a better way to mark down searched area.
+
     cur_ptr = new waypoint;
     cur_ptr->parent = nullptr;
     cur_ptr->point.resize(5);
@@ -49,22 +51,23 @@ bool hybridAstar::calculateRoute(const vector<float> *start, const vector<float>
     openSET.push_back(cur_ptr);
     Pending[index_cur] = cur_ptr;
 
+    int cnt =0;
     while(!openSET.empty())
     {
         cur_ptr = openSET[0];
         pop_heap(openSET.begin(), openSET.end(), greater1());
         openSET.pop_back();
 
-        if(GetReedsShepp(goal))//若不能生成无障碍的RS曲线，则继续循环
+        if(cnt >= 5)    //check reedsshepp every 5 turns.
         {
-            ROS_INFO("Path found!");
-            return true;
+            cnt = 0;
+            if( GetReedsShepp(goal))//若不能生成无障碍的RS曲线，则继续循环
+            {
+                ROS_INFO("Path found!");
+                return true;
             }
-        // if(fabs(cur_ptr->point[0]-(*goal)[0])<0.1 && fabs(cur_ptr->point[1]-(*goal)[1])<0.1)
-        // {
-        //     ROS_INFO("Path found!");
-        //     return true;
-        //     }
+        }
+        else cnt++;
 
         //将六个方向加入队列
         //同一个父节点产生的子节点会全部加入openSET，并在pending中加入cost最小的节点（如果有重复归属的话）
@@ -149,23 +152,7 @@ bool hybridAstar::GetReedsShepp(const vector<float> *goal)
     return true;
 }
 
-// void hybridAstar::free(waypoint *deletePTR)
-// {
-//     if(deletePTR == nullptr)
-//     {    
-//         root = nullptr;
-//         return;
-//     }
-//     if(deletePTR->members.size()==1)
-//     {
-//         delete deletePTR;
-//         return;
-//     }
-//     for(int i=1; i<deletePTR->members.size(); i++)
-//     {
-//         free(deletePTR->members[i]);
-//     }
-// }
+
 void hybridAstar::free()
 {
     for(auto it:route_tree)

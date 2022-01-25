@@ -16,6 +16,9 @@
     type="joint_state_publisher" >
     <param name="rate" value="100" />
 </node>
+<node name="map_br" pkg="car" type="map_br"/>
+<node name="map_server" pkg="map_server" type="map_server" args="$(find car)/map/testMap.yaml"/>
+
   <node
     name="robot_state_publisher"
     pkg="robot_state_publisher"
@@ -27,4 +30,7 @@
     pkg="rviz"
     type="rviz"
     args="-d $(find car)/car.rviz" />
+<include file="$(find simulation)/launch/simple_simulator.launch" />
+<include file="$(find car_planning)/launch/planningNode.launch" />
+  
 </launch>

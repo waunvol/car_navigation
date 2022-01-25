@@ -14,9 +14,9 @@ nav_msgs::Path getPathMsg(vector<pair<float, float>> path)
         geometry_msgs::PoseStamped pose;
         pose.header.stamp = time;
         pose.header.frame_id = "map";
-        pose.pose.position.x = it.first - 1;
+        pose.pose.position.x = it.first- 1;
         pose.pose.position.y = it.second - 13.8;
-        // pose.pose.position.z = 0.0;
+        pose.pose.position.z = 0.0;
         pose.pose.orientation.x = 0.0;
         pose.pose.orientation.y = 0.0;
         pose.pose.orientation.z = 0.0;
@@ -119,14 +119,14 @@ int main(int argc, char** argv)
             gradient path_A(A.wid, A.hig);
             path_A.calculatePath(potential_A, starting.first, starting.second, goals, paths_A);
 
-            paths_A.at(0) = plan.PathSmooth(paths_A.at(0));
+            paths_A.at(0) = plan.PathSmooth(3, paths_A.at(0));
             pathMSG_A = getPathMsg(paths_A.at(0));
 
             D.calculatePotential(starting.first, starting.second, goals, potential_D);
             gradient path_D(D.wid, D.hig);
             path_D.calculatePath(potential_D, starting.first, starting.second, goals, paths_d);
 
-            paths_d.at(0) = plan.PathSmooth(paths_d.at(0));
+            paths_d.at(0) = plan.PathSmooth(3, paths_d.at(0));
             pathMSG_D = getPathMsg(paths_d.at(0));
 
 /*          直接根据potential列出路径

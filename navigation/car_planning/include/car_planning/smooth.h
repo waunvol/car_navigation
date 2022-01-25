@@ -11,16 +11,15 @@ class smooth
 {
 private:
 
-    queue<pair<float, float>> _queue;
-
-    void BezierCalculate_(int level, float t);//
     void BezierCalculate(int level, float t);
+    pair<float,float> BezierSingalPointCalculate(int level, float t, queue<pair<float, float>> ctrl_pt);
+
 
 public:
     smooth();
     ~smooth();
 
-    vector<pair<float, float>> PathSmooth(const vector<pair<float, float>> &path);
+    vector<pair<float, float>> PathSmooth(int order ,const vector<pair<float, float>> &path);
 };
 
 smooth::smooth(/* args */)

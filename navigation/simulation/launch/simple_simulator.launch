@@ -1,0 +1,3 @@
+<launch>
+    <node name="simulator" pkg="simulation" type="simulator" output="screen"/>
+</launch>

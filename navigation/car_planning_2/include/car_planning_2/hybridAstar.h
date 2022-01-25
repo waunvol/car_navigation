@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include "rs_path.h"
+#include <memory>
 
 using namespace std;
 
@@ -23,6 +24,7 @@ public:
     };
     double a=0.02, rho=0.30, v=0.15;  //最大加速度与转弯半径,速度
     waypoint *cur_ptr;
+    // shared_ptr<waypoint> cur_ptr1;
     const vector<int8_t> *COST;
     vector<waypoint*> openSET;  //用openSET排序选出最优点
     vector<waypoint*> Pending;  //用pending记录点是否已被搜索过，且仅记录最优点（一个pending仅对应一个点）

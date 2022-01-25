@@ -1,6 +1,6 @@
-<package>
+<package format="2">
   <name>car</name>
-  <version>1.0.0</version>
+  <version>0.0.0</version>
   <description>
     <p>URDF Description package for car</p>
     <p>This package contains configuration data, 3D models and launch files
@@ -8,13 +8,23 @@ for car robot</p>
   </description>
   <author>me</author>
   <maintainer email="me2email@qq.com" />
-  <license>BSD</license>
+    <license>TODO</license>
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roslaunch</build_depend>
+  <!-- <build_depend>roslaunch</build_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>rviz</run_depend>
   <run_depend>joint_state_publisher</run_depend>
-  <run_depend>gazebo</run_depend>
+  <run_depend>gazebo</run_depend> -->
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>tf</build_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>tf</build_export_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>tf</exec_depend>
+
   <export>
     <architecture_independent />
   </export>
