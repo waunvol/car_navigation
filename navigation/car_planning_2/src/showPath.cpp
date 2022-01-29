@@ -13,8 +13,8 @@ bool rec_flag=0;
 
 void getGoal(const geometry_msgs::PoseStamped::ConstPtr msg, vector<float> *goal)
 {
-    (*goal)[0] = (*msg).pose.position.x+1.0;
-    (*goal)[1] = (*msg).pose.position.y+13.8;
+    (*goal)[0] = (*msg).pose.position.x;
+    (*goal)[1] = (*msg).pose.position.y;
 
     double R,P,Y;
     tf::Quaternion quat;
@@ -28,8 +28,8 @@ void getGoal(const geometry_msgs::PoseStamped::ConstPtr msg, vector<float> *goal
 
 void getPosition(const geometry_msgs::Pose::ConstPtr msg, vector<float> *starting)
 {
-    (*starting)[0] = (*msg).position.x+1.0;
-    (*starting)[1] = (*msg).position.y+13.8;
+    (*starting)[0] = (*msg).position.x;
+    (*starting)[1] = (*msg).position.y;
 
     double R,P,Y;
     tf::Quaternion quat;
@@ -57,8 +57,8 @@ nav_msgs::Path getPath(const vector<vector<float>> &route)
         geometry_msgs::PoseStamped pose;
         pose.header.stamp = time;
         pose.header.frame_id = "map";
-        pose.pose.position.x = it[0] - 1;
-        pose.pose.position.y = it[1] - 13.8;
+        pose.pose.position.x = it[0];
+        pose.pose.position.y = it[1];
         // pose.pose.position.z = 0.0;
         pose.pose.orientation.x = 0.0;
         pose.pose.orientation.y = 0.0;

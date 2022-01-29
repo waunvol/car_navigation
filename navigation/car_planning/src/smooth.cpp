@@ -6,7 +6,7 @@ using namespace std;
 
 pair<float,float> smooth::BezierSingalPointCalculate(int order, float t, queue<pair<float, float>> ctrl_pt)
 {
-    while(order>0)
+    while(ctrl_pt.size()!=1)
     {
         int cnt =0;
         pair<float, float> tmp;
@@ -34,30 +34,35 @@ vector<pair<float, float>> smooth::PathSmooth(int order ,const vector<pair<float
 {
     vector<pair<float, float>> waypoint;
 
+    float step = 1.0/order;
     for(size_t i=0;; )
     {
         queue<pair<float,float>> tmp;
-        for(size_t j=0; j<=order; j++) 
-        {
-            tmp.push(path[i+j]);
-        }
         
-        float step = 1.0/order;
-        for(float t=0; t<1-step/2; t+=step) // abort the last point
+        if( i>=path.size()-order) // for the rest path
         {
-            waypoint.push_back(BezierSingalPointCalculate(order, t, tmp));
-        }
-        
-
-        i+=order;
-        if( i>=path.size()) // for the rest path
-        {
-            step = 1.0/(path.size()-i+order);
+            order = path.size()-i;
+            step = 1.0/order;
+            for(size_t j=i; j<path.size();++j)
+            {
+                tmp.push(path[j]);
+            }
             for(float t=0; t<1; t+=step)    // end point do not abort
             {
                 waypoint.push_back(BezierSingalPointCalculate(order, t, tmp));
             }
             break;
+        }
+
+        
+        for(size_t j=0; j<=order; ++j) 
+        {
+            tmp.push(path[i+j]);
+        }
+        i+=order;
+        for(float t=0; t<1-step/2; t+=step) // abort the last point
+        {
+            waypoint.push_back(BezierSingalPointCalculate(order, t, tmp));
         }
 
     }

@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     while (ros::ok())
     {
       tf::Transform transform;
-      transform.setOrigin( tf::Vector3(0, 0, 0.0) );
+      transform.setOrigin( tf::Vector3(1.0, 13.8, 0.0) );
       tf::Quaternion q;
       q.setRPY(0, 0, 0);
       transform.setRotation(q);

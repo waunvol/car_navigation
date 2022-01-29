@@ -28,6 +28,8 @@ int main(int argc, char** argv) {
 
     ros::Subscriber speed_listener = n.subscribe("car/cmd", 1000, SpeedListener);
     ros::Subscriber pose_resetter = n.subscribe("/initialpose", 10, PoseReset);
+    // we have storge current pose of car, so we do not need a position listener, just publish the current pose message.
+    ros::Publisher pose_pub=  n.advertise<geometry_msgs::Pose>("car_position", 10);
     tf::TransformBroadcaster br;
     
 
@@ -56,6 +58,7 @@ int main(int argc, char** argv) {
         transform.setOrigin(tf::Vector3(cur_pose.position.x,cur_pose.position.y,cur_pose.position.z));
         br.sendTransform(tf::StampedTransform(transform,ros::Time::now(), "world", "base_footprint"));
 
+        pose_pub.publish(cur_pose);
         // ROS_INFO("cur_pos:%f,%f,%f ,%f,%f,%f,%f!",cur_pose.position.x,
         //                                         cur_pose.position.y,
         //                                         cur_pose.position.z,

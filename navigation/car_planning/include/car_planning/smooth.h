@@ -10,8 +10,6 @@ using namespace std;
 class smooth
 {
 private:
-
-    void BezierCalculate(int level, float t);
     pair<float,float> BezierSingalPointCalculate(int level, float t, queue<pair<float, float>> ctrl_pt);
 
 
