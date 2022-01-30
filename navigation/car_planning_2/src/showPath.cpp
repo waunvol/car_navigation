@@ -50,13 +50,13 @@ nav_msgs::Path getPath(const vector<vector<float>> &route)
     nav_msgs::Path path;
 
     ros::Time time = ros::Time::now();
-    path.header.frame_id = "map";
+    path.header.frame_id = "world";
     path.header.stamp = time;
     for(auto it:route)
     {
         geometry_msgs::PoseStamped pose;
         pose.header.stamp = time;
-        pose.header.frame_id = "map";
+        pose.header.frame_id = "world";
         pose.pose.position.x = it[0];
         pose.pose.position.y = it[1];
         // pose.pose.position.z = 0.0;
@@ -130,14 +130,8 @@ int main(int argc, char **argv)
             if(plan_2.searchRoute(&starting, &goals))
             {
                 route_2 = plan_2.getRoute();
-                // Rmsg = getPath(route_2);
-                // pathpub_R.publish(Rmsg);
-
                 //梯度下降优化路径
                 steepest exp;
-                // route_2 = exp.steepest_descent(40, route_2);
-                // Rmsg_2 = getPath(route_2);
-                // pathpub_R_2.publish(Rmsg_2);
 
                 route_2 = exp.steepest_descent(40, route_2);
                 Rmsg = getPath(route_2);

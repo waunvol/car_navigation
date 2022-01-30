@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
     ros::init(argc, argv, "car_tf_broadcaster");
     ros::NodeHandle n;
 
-    ros::Subscriber speed_listener = n.subscribe("car/cmd", 1000, SpeedListener);
+    ros::Subscriber speed_listener = n.subscribe("cmd", 1000, SpeedListener);
     ros::Subscriber pose_resetter = n.subscribe("/initialpose", 10, PoseReset);
     // we have storge current pose of car, so we do not need a position listener, just publish the current pose message.
     ros::Publisher pose_pub=  n.advertise<geometry_msgs::Pose>("car_position", 10);

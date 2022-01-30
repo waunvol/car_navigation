@@ -31,6 +31,6 @@
     type="rviz"
     args="-d $(find car)/car.rviz" />
 <include file="$(find simulation)/launch/simple_simulator.launch" />
-<include file="$(find car_planning)/launch/planningNode.launch" />
-  
+<!-- <include file="$(find car_planning)/launch/planningNode.launch" /> -->
+<include file="$(find car_planning_2)/launch/planner_2.launch" />  
 </launch>

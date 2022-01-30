@@ -58,7 +58,7 @@ bool hybridAstar::calculateRoute(const vector<float> *start, const vector<float>
         pop_heap(openSET.begin(), openSET.end(), greater1());
         openSET.pop_back();
 
-        if(cnt >= 5)    //check reedsshepp every 5 turns.
+        if(cnt >= 3)    //check reedsshepp every n turns.
         {
             cnt = 0;
             if( GetReedsShepp(goal))//若不能生成无障碍的RS曲线，则继续循环
