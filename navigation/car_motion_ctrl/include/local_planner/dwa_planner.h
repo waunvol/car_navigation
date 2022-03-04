@@ -8,6 +8,7 @@
 #include <geometry_msgs/Pose.h>
 #include <nav_msgs/Path.h>
 #include <tf/transform_broadcaster.h>
+#include <costmap_2d/costmap_2d_ros.h>
 
 // property: 1. sampling period; 2. max acceleration; 3. have a y direction speed or not; 4. predict period
 /*  get current velocity =>
@@ -26,10 +27,10 @@ using namespace std;
 
 class DWA_planner {
 private:
-    double max_linear_a=1;
-    double max_linear_v=5;
-    double max_angular_a=1;
-    double max_angular_v=3.14;
+    double max_linear_a=0.5;
+    double max_linear_v=1;
+    double max_angular_a=0.78;
+    double max_angular_v=1.57;
     int predict_cycle = 5;
     int sample_size = 7;
     double frequency = 0.1;
@@ -117,16 +118,15 @@ public:
         double v = cur_speed.linear.x - max_linear_a,
                w = cur_speed.angular.z - max_angular_a;
         for (size_t i = 0; i <= sample_size; i++) {
-            ROS_INFO("Get v:%f, w:%f", v, w);
+            // ROS_INFO("Get v:%f, w:%f", v, w);
             if (v > 0 && v <= max_linear_v) {
                 linear_speed_sample.push_back(v);
             }
             if (abs(w) <= max_angular_v) {
                 angular_speed_sample.push_back(w);
             }
-            v += (2.0 / sample_size) * max_linear_a;
-            w += (2.0 / sample_size) * max_angular_a;
-            
+            v += (2.0f / sample_size) * max_linear_a;
+            w += (2.0f / sample_size) * max_angular_a;
         }
 
         if(linear_speed_sample.size()<1 or angular_speed_sample.size()<1){
@@ -144,9 +144,16 @@ public:
 
         int best = Evaluate(trajectorys_set, global_path);
         last_trajectory = trajectorys_set[best];
-        cur_speed.linear.x = linear_speed_sample[best/linear_speed_sample.size()];
-        cur_speed.angular.z = angular_speed_sample[best%linear_speed_sample.size()];
+        cur_speed.linear.x = linear_speed_sample[best%linear_speed_sample.size()];
+        cur_speed.angular.z = angular_speed_sample[best/linear_speed_sample.size()];
 
         return true;
+    }
+
+    void SetSpeedConfig(double max_lin_v, double max_lin_a, double max_ang_v, double max_ang_a){
+        max_linear_v = max_lin_v;
+        max_linear_a = max_lin_a;
+        max_angular_v = max_ang_v;
+        max_angular_a = max_ang_a;
     }
 };

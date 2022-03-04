@@ -5,20 +5,12 @@
 bool rec_flag = 0;
 nav_msgs::Path g_path;
 geometry_msgs::Pose cur_pose;
-geometry_msgs::Twist sped;
+
 
 void path_pubRECV(const nav_msgs::Path::ConstPtr msg, vector<pair<float, float>> *path)
 {
-    // path->clear();
-    // pair<float, float> tmp;
-    // for(auto it:(*msg).poses)
-    // {
-    //     tmp.first = it.pose.position.x;
-    //     tmp.second = it.pose.position.y;
-    //     path->push_back(tmp);
-    // }
-    rec_flag = 1;
     g_path = *msg;
+    rec_flag = true;
 }
 
 void UpdatePose(const geometry_msgs::Pose msg) {
@@ -37,37 +29,60 @@ int main(int argc, char** argv)
     vector<pair<float, float>> path;
     ros::Subscriber path_sub = n.subscribe<nav_msgs::Path>(PathName, 1, boost::bind(&path_pubRECV, _1, &path));
     ros::Subscriber pos_sub = n.subscribe("car_position",1,UpdatePose);
+
     ros::Publisher tra_pub = n.advertise<nav_msgs::Path>("dwa_trajectory", 5);
+    ros::Publisher speed_pub = n.advertise<geometry_msgs::Twist>("cmd", 1);
 
     MotionControl cmd;
-    ros::Rate r(30);
-    ros::AsyncSpinner spinner(4); // Use 4 threads
+    ros::Rate r(20);
+    ros::AsyncSpinner spinner(1); // Use 1 threads
 
     ROS_INFO("Motion control ready!");
 
-    DWA_planner a;
-    spinner.start();
+    DWA_planner dwa_planner;
+    dwa_planner.SetSpeedConfig(2, 0.5, 1.57, 0.52);
+    
+    double tolerance = 0.5;
+    const double min_tolerance = 0.05;
 
+    spinner.start();
     while(ros::ok())
     {
-        
-        if(rec_flag)
+        if(rec_flag == true)
         {
-            ROS_INFO("get nav!");
-            if(!a.CalculateSpeed(g_path, cur_pose, sped)){
-                ROS_ERROR("Dwa planning failed!");
+            geometry_msgs::Twist sped;
+            rec_flag = false;
+            while(rec_flag == false) // interrupt when get new goal;
+            {
+                // calculate local path
+                if(!dwa_planner.CalculateSpeed(g_path, cur_pose, sped)){
+                    ROS_ERROR("Dwa planning failed!");
+                }
+                tra_pub.publish(dwa_planner.GetTrajectory());
+                speed_pub.publish(sped);
+
+                // tolerance control (when pose is closer to the target, tolerance should be smaller)
+                if(g_path.poses.size() <= 20) {
+                    tolerance -= (tolerance - min_tolerance) / g_path.poses.size();
+                }
+                ROS_INFO("tolerence is %lf", tolerance);
+
+                // check wether arrive the last goal
+                if(sqrt(pow(cur_pose.position.x - g_path.poses.back().pose.position.x,2)+
+                        pow(cur_pose.position.y - g_path.poses.back().pose.position.y,2)) <= tolerance) {
+                    if(g_path.poses.size()<1) {
+                        break;
+                    }
+                    g_path.poses.pop_back();
+                }
+
+                
+
+                r.sleep();
             }
-            tra_pub.publish(a.GetTrajectory());
-            // ROS_INFO("Plan received!");
-            // cmd.stop();
-            // rec_flag=0;
-            // cmd.getPATH(path);
-            // cmd.start();
-            rec_flag=0;
-            sped.angular.z=0;
-            sped.linear.x = 0;
         }
-        r.sleep();
+
     }
+    ros::waitForShutdown();
     return 0;
 }
