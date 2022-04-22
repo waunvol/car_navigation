@@ -1,4 +1,4 @@
-#include "motionCTRL.h"
+#include "PIDcontroller.h"
 #include <nav_msgs/Path.h>
 #include "dwa_planner.h"
 
@@ -30,20 +30,14 @@ int main(int argc, char** argv)
     ros::Subscriber path_sub = n.subscribe<nav_msgs::Path>(PathName, 1, boost::bind(&path_pubRECV, _1, &path));
     ros::Subscriber pos_sub = n.subscribe("car_position",1,UpdatePose);
 
-    ros::Publisher tra_pub = n.advertise<nav_msgs::Path>("dwa_trajectory", 5);
+    // ros::Publisher tra_pub = n.advertise<nav_msgs::Path>("dwa_trajectory", 5);
     ros::Publisher speed_pub = n.advertise<geometry_msgs::Twist>("cmd", 1);
 
-    MotionControl cmd;
     ros::Rate r(20);
-    ros::AsyncSpinner spinner(1); // Use 1 threads
+    ros::AsyncSpinner spinner(1); // Use another to subscribe position
 
     ROS_INFO("Motion control ready!");
-
-    DWA_planner dwa_planner;
-    dwa_planner.SetSpeedConfig(2, 0.5, 1.57, 0.52);
-    
-    double tolerance = 0.5;
-    const double min_tolerance = 0.05;
+    double tolerance = 0.1;
 
     spinner.start();
     while(ros::ok())
@@ -54,18 +48,7 @@ int main(int argc, char** argv)
             rec_flag = false;
             while(rec_flag == false) // interrupt when get new goal;
             {
-                // calculate local path
-                if(!dwa_planner.CalculateSpeed(g_path, cur_pose, sped)){
-                    ROS_ERROR("Dwa planning failed!");
-                }
-                tra_pub.publish(dwa_planner.GetTrajectory());
-                speed_pub.publish(sped);
 
-                // tolerance control (when pose is closer to the target, tolerance should be smaller)
-                if(g_path.poses.size() <= 20) {
-                    tolerance -= (tolerance - min_tolerance) / g_path.poses.size();
-                }
-                ROS_INFO("tolerence is %lf", tolerance);
 
                 // check wether arrive the last goal
                 if(sqrt(pow(cur_pose.position.x - g_path.poses.back().pose.position.x,2)+
