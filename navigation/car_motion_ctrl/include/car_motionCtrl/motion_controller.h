@@ -14,8 +14,9 @@ public:
         reset();
     }
 
-    void setTolerance(double a_tol,  double l_tol) {
+    void InitController(double a_tol,  double l_tol, double freq) {
         angular_tol = a_tol, linear_tol = l_tol;
+        t = 1.0f/freq;
     }
 
     std::pair<double, double> CalculateValue(const Pose_t &cur_pose, const double va_0, const double vl_0) {
@@ -44,12 +45,5 @@ private:
     double angular_tol = 0.1, linear_tol = 0.05;
     double t;
     std::vector<Pose_t> remaining_path;
-    
-    double getAngleErr() {
-        return 0.0;
-    }
-    double getLineErr(const geometry_msgs::Pose &cur_pose) {
-        return 0.0;
-    }
 
 };
