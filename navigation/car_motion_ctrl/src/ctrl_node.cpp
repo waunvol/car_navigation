@@ -2,7 +2,12 @@
 #include <nav_msgs/Path.h>
 #include "dwa_planner.h"
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-// #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+
+/**
+ * to do:
+ * 1. process global path, make less waypoints (incress internal of each point)
+ * 
+ */
 
 bool rec_flag = 0;
 Pose_t cur_pose;
@@ -33,7 +38,7 @@ void UpdatePose(const geometry_msgs::Pose msg) {
     cur_pose.yaw = quat_tf.getAngleShortestPath();
 }
 
-
+// global path need process
 
 int main(int argc, char** argv)
 {
@@ -41,6 +46,7 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
 
     string PathName = argv[1]; 
+    int frequency = 20;
 
     std::vector<Pose_t> global_path;
     ros::Subscriber path_sub = n.subscribe<nav_msgs::Path>(PathName, 1, boost::bind(&path_pubRECV, _1, &global_path));
@@ -48,25 +54,36 @@ int main(int argc, char** argv)
 
     ros::Publisher speed_pub = n.advertise<geometry_msgs::Twist>("cmd", 1);
 
-    ros::Rate r(20);
+    ros::Rate r(frequency);
     ros::AsyncSpinner spinner(1); // Use another to subscribe position
 
     ROS_INFO("Motion control ready!");
 
+    MotionController controller;
+    controller.InitController(0.1, 0.1, frequency);
+    controller.setPID(1.0, 0, 0);
+    std::pair<double, double> cur_speed = {0.0, 0.0};
+
     spinner.start();
     while(ros::ok())
     {
-        MotionController controller;
+
         if(rec_flag == true)
         {
             geometry_msgs::Twist speed;
             rec_flag = false;
             while(rec_flag == false) // interrupt when get new goal;
-            {
+            {   
+                if (sqrt(pow(cur_pose.x - global_path.front().x, 2) +
+                        pow(cur_pose.y - global_path.front().y, 2)))
+                {
+                    break;
+                }
+                cur_speed = controller.CalculateValue(cur_pose, cur_speed.first, cur_speed.second);
                 r.sleep();
             }
         }
-
+        r.sleep();
     }
     ros::waitForShutdown();
     return 0;
