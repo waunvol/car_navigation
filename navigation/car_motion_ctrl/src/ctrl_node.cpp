@@ -46,7 +46,6 @@ int main(int argc, char** argv)
     ros::Subscriber path_sub = n.subscribe<nav_msgs::Path>(PathName, 1, boost::bind(&path_pubRECV, _1, &global_path));
     ros::Subscriber pos_sub = n.subscribe("car_position", 1, UpdatePose);
 
-    // ros::Publisher tra_pub = n.advertise<nav_msgs::Path>("dwa_trajectory", 5);
     ros::Publisher speed_pub = n.advertise<geometry_msgs::Twist>("cmd", 1);
 
     ros::Rate r(20);
@@ -57,6 +56,7 @@ int main(int argc, char** argv)
     spinner.start();
     while(ros::ok())
     {
+        MotionController controller;
         if(rec_flag == true)
         {
             geometry_msgs::Twist speed;
