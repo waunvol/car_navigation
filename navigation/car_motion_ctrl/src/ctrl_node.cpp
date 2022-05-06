@@ -6,7 +6,8 @@
 /**
  * to do:
  * 1. process global path, make less waypoints (incress internal of each point)
- * 
+ * 2. rec_flag is not thread saft. Fix it.
+ * 3. publish speed.
  */
 
 bool rec_flag = 0;
