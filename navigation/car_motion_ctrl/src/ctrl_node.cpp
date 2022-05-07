@@ -1,6 +1,5 @@
 #include "motion_controller.h"
 #include <nav_msgs/Path.h>
-#include "dwa_planner.h"
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 /**
@@ -10,12 +9,15 @@
  * 3. publish speed.
  */
 
-bool rec_flag = 0;
+std::atomic<bool> rec_flag;
 Pose_t cur_pose;
+std::mutex path_lock;
 
 void path_pubRECV(const nav_msgs::Path::ConstPtr msg, std::vector<Pose_t> *path)
 {
-    rec_flag = true;
+    std::lock_guard<std::mutex> lock(path_lock);
+
+    rec_flag.store(true, std::memory_order_relaxed);
     Pose_t pt;
     for(int i=0; i<msg->poses.size()-1; ++i) {
         pt.x = msg->poses[i].pose.position.x;
@@ -46,7 +48,9 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "ctrl_node");
     ros::NodeHandle n;
 
-    string PathName = argv[1]; 
+    rec_flag = 0;
+    // string PathName = argv[1]; 
+    string PathName = "Astar_path"; 
     int frequency = 20;
 
     std::vector<Pose_t> global_path;
@@ -59,28 +63,38 @@ int main(int argc, char** argv)
     ros::AsyncSpinner spinner(1); // Use another to subscribe position
 
     ROS_INFO("Motion control ready!");
+    double tolerance = 0.05;
 
     MotionController controller;
     controller.InitController(0.1, 0.1, frequency);
-    controller.setPID(1.0, 0, 0);
+    controller.setPID(0.01, 0, 0);
     std::pair<double, double> cur_speed = {0.0, 0.0};
 
     spinner.start();
     while(ros::ok())
     {
 
-        if(rec_flag == true)
+        if(rec_flag.load(std::memory_order_relaxed))
         {
             geometry_msgs::Twist speed;
-            rec_flag = false;
-            while(rec_flag == false) // interrupt when get new goal;
+            rec_flag.store(false, std::memory_order_relaxed);
+
+            path_lock.lock();
+            controller.setGlobalPath(global_path);
+            path_lock.unlock();
+
+            while(!rec_flag.load(std::memory_order_relaxed)) // interrupt when get new goal;
             {   
                 if (sqrt(pow(cur_pose.x - global_path.front().x, 2) +
-                        pow(cur_pose.y - global_path.front().y, 2)))
+                        pow(cur_pose.y - global_path.front().y, 2)) < tolerance)
                 {
                     break;
                 }
                 cur_speed = controller.CalculateValue(cur_pose, cur_speed.first, cur_speed.second);
+                speed.linear.x = cur_speed.first;
+                speed.angular.z = cur_speed.second;
+                speed_pub.publish(speed);
+
                 r.sleep();
             }
         }

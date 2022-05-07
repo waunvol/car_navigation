@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(car_motion_ctrl)
-# SET(CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_BUILD_TYPE Debug)
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
