@@ -4,9 +4,8 @@
 
 /**
  * to do:
- * 1. process global path, make less waypoints (incress internal of each point)
- * 2. rec_flag is not thread saft. Fix it.
- * 3. publish speed.
+ * 1. inverse hybirdstar path
+ * 2. fix astar path
  */
 
 std::atomic<bool> rec_flag;
@@ -39,7 +38,7 @@ void UpdatePose(const geometry_msgs::Pose msg) {
     cur_pose.x = msg.position.x;
     cur_pose.y = msg.position.y;
     cur_pose.yaw = tf::getYaw(pose.getRotation());
-    ROS_INFO("current pose:x %lf, y %lf, yaw %lf", cur_pose.x, cur_pose.y, cur_pose.yaw);
+    // ROS_INFO("current pose:x %lf, y %lf, yaw %lf", cur_pose.x, cur_pose.y, cur_pose.yaw);
 }
 
 // global path need process
@@ -50,8 +49,8 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
 
     rec_flag = 0;
-    // string PathName = argv[1]; 
-    string PathName = "Astar_path"; 
+    string PathName = argv[1]; 
+    // string PathName = "Astar_path"; 
     int frequency = 20;
 
     std::vector<Pose_t> global_path;
@@ -68,8 +67,14 @@ int main(int argc, char** argv)
 
     MotionController controller;
     controller.InitController(0.05, 0.05, frequency);
-    controller.setPID(0.03, 0.0, 0);
+    controller.setPID(0.008, 0.0, 0);
     std::pair<double, double> cur_speed = {0.0, 0.0};
+
+    // speed set to zero
+    geometry_msgs::Twist speed;
+    speed.angular.z = 0;
+    speed.linear.x = 0;
+    speed_pub.publish(speed);
 
     spinner.start();
     while(ros::ok())
@@ -77,8 +82,9 @@ int main(int argc, char** argv)
 
         if(rec_flag.load(std::memory_order_relaxed))
         {
-            geometry_msgs::Twist speed;
+            
             rec_flag.store(false, std::memory_order_relaxed);
+            ROS_INFO("Navigation start!");
 
             path_lock.lock();
             controller.setGlobalPath(global_path);
@@ -91,6 +97,7 @@ int main(int argc, char** argv)
                 {
                     speed.linear.x = 0;
                     speed.angular.z = 0;
+                    speed_pub.publish(speed);
                     ROS_INFO("Navigation finish!");
                     break;
                 }

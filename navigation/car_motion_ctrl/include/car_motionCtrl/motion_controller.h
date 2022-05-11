@@ -36,6 +36,7 @@ public:
 
         if (line_err < linear_tol && angle_err < angular_tol)
         {
+            ROS_INFO("cur pt finish, next pt!");
             reset(); // enter next loop
             remaining_path.pop_back();
             angle_err = remaining_path.back().yaw - cur_pose.yaw;
