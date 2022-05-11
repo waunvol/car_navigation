@@ -22,7 +22,7 @@ void path_pubRECV(const nav_msgs::Path::ConstPtr msg, std::vector<Pose_t> *path)
     for(int i=0; i<msg->poses.size()-1; ++i) {
         pt.x = msg->poses[i].pose.position.x;
         pt.y = msg->poses[i].pose.position.y;
-        pt.yaw = atan((pt.y - msg->poses[i+1].pose.position.y)/
+        pt.yaw = std::atan2((pt.y - msg->poses[i+1].pose.position.y),
                     (pt.x - msg->poses[i+1].pose.position.x));
         path->push_back(pt);
     }
@@ -34,11 +34,12 @@ void path_pubRECV(const nav_msgs::Path::ConstPtr msg, std::vector<Pose_t> *path)
 }
 
 void UpdatePose(const geometry_msgs::Pose msg) {
-    tf2::Quaternion quat_tf;
-    tf2::fromMsg(msg.orientation, quat_tf);
+    tf::Pose pose;
+    tf::poseMsgToTF(msg, pose);
     cur_pose.x = msg.position.x;
     cur_pose.y = msg.position.y;
-    cur_pose.yaw = quat_tf.getAngleShortestPath();
+    cur_pose.yaw = tf::getYaw(pose.getRotation());
+    ROS_INFO("current pose:x %lf, y %lf, yaw %lf", cur_pose.x, cur_pose.y, cur_pose.yaw);
 }
 
 // global path need process
@@ -66,8 +67,8 @@ int main(int argc, char** argv)
     double tolerance = 0.05;
 
     MotionController controller;
-    controller.InitController(0.1, 0.1, frequency);
-    controller.setPID(0.01, 0, 0);
+    controller.InitController(0.05, 0.05, frequency);
+    controller.setPID(0.03, 0.0, 0);
     std::pair<double, double> cur_speed = {0.0, 0.0};
 
     spinner.start();
@@ -88,6 +89,9 @@ int main(int argc, char** argv)
                 if (sqrt(pow(cur_pose.x - global_path.front().x, 2) +
                         pow(cur_pose.y - global_path.front().y, 2)) < tolerance)
                 {
+                    speed.linear.x = 0;
+                    speed.angular.z = 0;
+                    ROS_INFO("Navigation finish!");
                     break;
                 }
                 cur_speed = controller.CalculateValue(cur_pose, cur_speed.first, cur_speed.second);
