@@ -49,8 +49,8 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
 
     rec_flag = 0;
-    string PathName = argv[1]; 
-    // string PathName = "Astar_path"; 
+    // string PathName = argv[1]; 
+    string PathName = "Astar_path"; 
     int frequency = 20;
 
     std::vector<Pose_t> global_path;
@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
     MotionController controller;
     controller.InitController(0.05, 0.05, frequency);
-    controller.setPID(0.008, 0.0, 0);
+    controller.setPID(0.012, 0.0, 0);
     std::pair<double, double> cur_speed = {0.0, 0.0};
 
     // speed set to zero

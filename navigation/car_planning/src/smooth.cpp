@@ -45,12 +45,12 @@ vector<pair<float, float>> smooth::PathSmooth(int order ,const vector<pair<float
             step = 1.0/order;
             for(size_t j=i; j<path.size();++j)
             {
-                tmp.push(path[j]);
+                waypoint.push_back(path[j]);
             }
-            for(float t=0; t<1; t+=step)    // end point do not abort
-            {
-                waypoint.push_back(BezierSingalPointCalculate(order, t, tmp));
-            }
+            // for(float t=0; t<1; t+=step)    // end point do not abort
+            // {
+            //     waypoint.push_back(BezierSingalPointCalculate(order, t, tmp));
+            // }
             break;
         }
 
