@@ -66,8 +66,9 @@ int main(int argc, char** argv)
     double tolerance = 0.05;
 
     MotionController controller;
-    controller.InitController(0.05, 0.05, frequency);
-    controller.setPID(0.012, 0.0, 0);
+    controller.InitController(0.05, frequency);
+    controller.SetLinearPID(0.04, 0.005, 0);
+    controller.SetAngularPID(0.08, 0.001, 0);
     std::pair<double, double> cur_speed = {0.0, 0.0};
 
     // speed set to zero
