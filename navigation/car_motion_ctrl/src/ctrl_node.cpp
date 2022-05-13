@@ -15,7 +15,6 @@ std::mutex path_lock;
 void path_pubRECV(const nav_msgs::Path::ConstPtr msg, std::vector<Pose_t> *path)
 {
     std::lock_guard<std::mutex> lock(path_lock);
-
     rec_flag.store(true, std::memory_order_relaxed);
     Pose_t pt;
     for(int i=0; i<msg->poses.size()-1; ++i) {
@@ -49,8 +48,7 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
 
     rec_flag = 0;
-    // string PathName = argv[1]; 
-    string PathName = "Astar_path"; 
+    string PathName = argv[1]; 
     int frequency = 20;
 
     std::vector<Pose_t> global_path;
@@ -89,6 +87,7 @@ int main(int argc, char** argv)
 
             path_lock.lock();
             controller.setGlobalPath(global_path);
+            global_path.clear();
             path_lock.unlock();
 
             while(!rec_flag.load(std::memory_order_relaxed)) // interrupt when get new goal;
