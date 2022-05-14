@@ -6,21 +6,32 @@
     default="False" />
   <param
     name="robot_description"
-    textfile="$(find car)/robots/car.urdf" />
+    textfile="$(find car)/robots/xacro/car.xacro" />
   <param
     name="use_gui"
     value="$(arg gui)" />
   <node
     name="joint_state_publisher"
     pkg="joint_state_publisher"
-    type="joint_state_publisher" />
+    type="joint_state_publisher" >
+    <param name="rate" value="100" />
+</node>
+<node name="map_br" pkg="car" type="map_br"/>
+<node name="map_server" pkg="map_server" type="map_server" args="$(find car)/map/testMap.yaml"/>
+
   <node
     name="robot_state_publisher"
     pkg="robot_state_publisher"
-    type="state_publisher" />
+    type="robot_state_publisher" >
+    <param name="rate" value="100" />
+</node>
   <node
     name="rviz"
     pkg="rviz"
     type="rviz"
-    args="-d $(find car)/urdf.rviz" />
+    args="-d $(find car)/car.rviz" />
+<include file="$(find simulation)/launch/simple_simulator.launch" />
+<include file="$(find car_planning)/launch/planningNode.launch" />
+<!-- <include file="$(find car_planning_2)/launch/planner_2.launch" />   -->
+
 </launch>

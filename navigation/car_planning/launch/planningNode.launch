@@ -1,5 +1,7 @@
 <launch>
-    <arg name="PathTopic" default="Astar_path"/>
+    <!-- Dijkstra_path -->
+    <!-- Astar_path -->
+    <arg name="PathTopic" default="Dijkstra_path"/>
 
     <node name="PlanNode" pkg="car_planning" type="PlanNode" output="screen"/>
     <node name="ctrlNode" pkg="car_motion_ctrl" type="ctrlNode" args="$(arg PathTopic)" output="screen"/>
