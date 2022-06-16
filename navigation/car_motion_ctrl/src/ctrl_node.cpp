@@ -49,7 +49,8 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
 
     rec_flag = 0;
-    string PathName = argv[1]; 
+    string PathName;// = argv[1]; 
+    PathName = "Dijkstra_path";
     int frequency = 20;
 
     std::vector<Pose_t> global_path;
@@ -88,10 +89,10 @@ int main(int argc, char** argv)
             rec_flag.store(false, std::memory_order_relaxed);
             ROS_INFO("Navigation start!");
 
-            path_lock.lock();
-            // controller.setGlobalPath(global_path);
-            global_path.clear();
-            path_lock.unlock();
+            // path_lock.lock();
+            // // controller.setGlobalPath(global_path);
+            // global_path.clear();
+            // path_lock.unlock();
 
             while(!rec_flag.load(std::memory_order_relaxed)) // interrupt when get new goal;
             {   

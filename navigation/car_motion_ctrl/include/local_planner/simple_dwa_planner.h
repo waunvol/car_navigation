@@ -65,21 +65,21 @@ private:
 
         // the scorl here just for global path matching.
         double min_score = DBL_MAX;
-        for (size_t i = 0; i < trajectorys.size(); i++) {
+        for (int i = 0; i < trajectorys.size(); i++) {
             // each trajectory
             double cur_score = 0;
             size_t useful_point_index = global_path.size()-1;
-            for (size_t j = 0; j < trajectorys[i].poses.size(); j++) {
+            for (int j = 0; j < trajectorys[i].poses.size(); j++) {
                 // each trajectory point
                 double min_dist = DBL_MAX;
-                for (size_t k = useful_point_index; k >= 0; k--) {
+                for (int k = useful_point_index; k >= 0; k--) {
                     // each path point
                     
                     double dist = sqrt(pow((trajectorys[i].poses[j].pose.position.x - global_path[k].x), 2)
                                          + pow((trajectorys[i].poses[j].pose.position.y - global_path[k].y), 2));
                     if (dist < min_dist) {
                         min_dist = dist;
-                        k-1<=0 ? useful_point_index = k : useful_point_index = k-1;
+                        k-1<=0 ? useful_point_index = 0 : useful_point_index = k-1;
                     }
                 }
                 
@@ -104,7 +104,7 @@ public:
     ~DWA_planner() {
     }
     // to do: show planning path; add param to control the fit
-    nav_msgs::Path GetTrajectory() {
+    nav_msgs::Path GetLastTrajectory() {
         last_trajectory.header.frame_id = "world";
         ros::Time time = ros::Time::now();
         last_trajectory.header.stamp = time;
