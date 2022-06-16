@@ -21,7 +21,7 @@ catkin_package(
 )
 
 include_directories(
-# include
+  include
   include/car_motionCtrl
   include/local_planner
   ${catkin_INCLUDE_DIRS}

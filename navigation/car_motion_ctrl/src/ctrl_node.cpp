@@ -1,6 +1,7 @@
 #include "motion_controller.h"
 #include <nav_msgs/Path.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include "local_planner/simple_dwa_planner.h"
 
 /**
  * to do:
@@ -69,6 +70,8 @@ int main(int argc, char** argv)
     controller.SetAngularPID(0.08, 0.001, 0);
     std::pair<double, double> cur_speed = {0.0, 0.0};
 
+    DWA_planner local_planner;
+
     // speed set to zero
     geometry_msgs::Twist speed;
     speed.angular.z = 0;
@@ -86,7 +89,7 @@ int main(int argc, char** argv)
             ROS_INFO("Navigation start!");
 
             path_lock.lock();
-            controller.setGlobalPath(global_path);
+            // controller.setGlobalPath(global_path);
             global_path.clear();
             path_lock.unlock();
 
@@ -101,7 +104,8 @@ int main(int argc, char** argv)
                     ROS_INFO("Navigation finish!");
                     break;
                 }
-                cur_speed = controller.CalculateValue(cur_pose, cur_speed.first, cur_speed.second);
+                // cur_speed = controller.CalculateValue(cur_pose, cur_speed.first, cur_speed.second);
+                local_planner.CalculateSpeed(global_path, cur_pose, cur_speed);
                 speed.linear.x = cur_speed.first;
                 speed.angular.z = cur_speed.second;
                 speed_pub.publish(speed);

@@ -1,10 +1,7 @@
 #pragma once
 #include "PIDcontroller.h"
 #include <nav_msgs/Path.h>
-
-struct Pose_t{
-    double x, y ,yaw;
-};
+#include "type.h"
 
 
 class MotionController {
