@@ -10,6 +10,7 @@
 #include <tf/transform_broadcaster.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include "type.h"
+#include "utility/visualizaion.h"
 
 // property: 1. sampling period; 2. max acceleration; 3. have a y direction speed or not; 4. predict period
 /*  get current velocity =>
@@ -36,6 +37,7 @@ private:
     int sample_size = 7;
     double frequency = 0.1;
     nav_msgs::Path last_trajectory;
+    PathMarkers path_markers = PathMarkers("show_cal_paths");   // for debug
 
     // this funtion should match motion model
     inline nav_msgs::Path GetTrajectory(const Pose_t &cur_pos, const double &v, const double &w) {
@@ -140,6 +142,7 @@ public:
                                                         angular_speed_sample[j]));
             }
         }
+        path_markers.ShowPathMarkers(trajectorys_set);
 
         int best = DistEvaluate(trajectorys_set, global_path);
         last_trajectory = trajectorys_set[best];
