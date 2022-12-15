@@ -47,6 +47,8 @@ private:
         waypoint.pose.position.x = cur_pos.x;
         waypoint.pose.position.y = cur_pos.y;
         waypoint.header.frame_id = "world";
+        waypoint.pose.orientation = tf::createQuaternionMsgFromYaw(direction);
+        trajectory.poses.push_back(waypoint);
 
         ros::Time time = ros::Time::now();
         waypoint.header.stamp = time;
@@ -142,6 +144,7 @@ public:
                                                         angular_speed_sample[j]));
             }
         }
+        ROS_INFO("Size of trajectory %d", trajectorys_set.size());
         path_markers.ShowPathMarkers(trajectorys_set);
 
         int best = DistEvaluate(trajectorys_set, global_path);

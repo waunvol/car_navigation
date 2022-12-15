@@ -27,17 +27,21 @@ public:
     {
         visualization_msgs::MarkerArray path_markers;
         visualization_msgs::Marker marker;
-        marker.header.stamp = ros::Time();
+        marker.header.stamp = ros::Time::now();
+        marker.id = 0;
         marker.type = visualization_msgs::Marker::LINE_STRIP;
         marker.action = visualization_msgs::Marker::ADD;
-        marker.scale.x = 0.05;
+        marker.scale.x = 0.005;
         marker.color.a = 1.0;
         marker.color.r = 10.0;
         marker.color.g = 10.0;
         marker.color.b = 255.0;
         for(const auto &path:paths)
         {
-            marker.header.frame_id = path.header.frame_id;
+            if (path.header.frame_id.empty())
+                marker.header.frame_id = "world";
+            else
+                marker.header.frame_id = path.header.frame_id;
             marker.points.clear();
             for (const auto &point:path.poses)
             {
@@ -47,6 +51,7 @@ public:
                 marker.points.emplace_back(pt);
             }
             path_markers.markers.emplace_back(marker);
+            marker.id++;
         }
         path_pub.publish(path_markers);
     }

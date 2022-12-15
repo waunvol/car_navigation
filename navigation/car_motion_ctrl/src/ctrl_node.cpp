@@ -109,8 +109,8 @@ int main(int argc, char** argv)
                 local_planner.CalculateSpeed(global_path, cur_pose, cur_speed);
                 speed.linear.x = cur_speed.first;
                 speed.angular.z = cur_speed.second;
-                speed_pub.publish(speed);
-
+                // speed_pub.publish(speed);
+                while(1);
                 r.sleep();
             }
         }
