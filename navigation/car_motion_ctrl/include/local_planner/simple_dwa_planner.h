@@ -40,30 +40,22 @@ private:
     PathMarkers path_markers = PathMarkers("show_cal_paths");   // for debug
 
     // this funtion should match motion model
-    inline nav_msgs::Path GetTrajectory(const Pose_t &cur_pos, const double &v, const double &w) {
-        nav_msgs::Path trajectory;
-        double direction = cur_pos.yaw;
-        geometry_msgs::PoseStamped waypoint; 
-        waypoint.pose.position.x = cur_pos.x;
-        waypoint.pose.position.y = cur_pos.y;
-        waypoint.header.frame_id = "world";
-        waypoint.pose.orientation = tf::createQuaternionMsgFromYaw(direction);
-        trajectory.poses.push_back(waypoint);
+    inline vector<Pose_t> GetTrajectory(const Pose_t &cur_pos, const double &v, const double &w) {
+        vector<Pose_t> trajectory;
+        Pose_t waypoint = cur_pos; 
+        trajectory.push_back(waypoint);
 
-        ros::Time time = ros::Time::now();
-        waypoint.header.stamp = time;
         for (size_t i = 0; i < predict_cycle; i++) {
-            direction += w*frequency;
-            waypoint.pose.position.x = waypoint.pose.position.x + v*frequency*cos(direction);
-            waypoint.pose.position.y = waypoint.pose.position.y + v*frequency*sin(direction);
-            waypoint.pose.orientation = tf::createQuaternionMsgFromYaw(direction);
-            trajectory.poses.push_back(waypoint);
+            waypoint.yaw+= w*frequency;
+            waypoint.x = waypoint.x + v*frequency*cos(waypoint.yaw);
+            waypoint.y = waypoint.y + v*frequency*sin(waypoint.yaw);
+            trajectory.push_back(waypoint);
         }
         return trajectory;
     }
 
 
-    int DistEvaluate(const vector<nav_msgs::Path> &trajectorys, const vector<Pose_t> &global_path) {
+    int DistEvaluate(const vector<vector<Pose_t>> &trajectorys, const vector<Pose_t> &global_path) {
         //only current or behind global path point can be evaluate, not for front point.
         int index;
 
@@ -73,14 +65,14 @@ private:
             // each trajectory
             double cur_score = 0;
             size_t useful_point_index = global_path.size()-1;
-            for (int j = 0; j < trajectorys[i].poses.size(); j++) {
+            for (int j = 0; j < trajectorys[i].size(); j++) {
                 // each trajectory point
                 double min_dist = DBL_MAX;
                 for (int k = useful_point_index; k >= 0; k--) {
                     // each path point
                     
-                    double dist = sqrt(pow((trajectorys[i].poses[j].pose.position.x - global_path[k].x), 2)
-                                         + pow((trajectorys[i].poses[j].pose.position.y - global_path[k].y), 2));
+                    double dist = sqrt(pow((trajectorys[i][j].x - global_path[k].x), 2)
+                                         + pow((trajectorys[i][j].y - global_path[k].y), 2));
                     if (dist < min_dist) {
                         min_dist = dist;
                         k-1<=0 ? useful_point_index = 0 : useful_point_index = k-1;
@@ -95,6 +87,15 @@ private:
                 index = i;
             }
         }
+
+        for (auto trajectory:trajectorys)
+        {
+            std::vector<std::vector<float>> dist_mtr;
+            for (auto pt:trajectory)
+            {
+            }
+        }
+
 
         return index;
     }
@@ -136,7 +137,7 @@ public:
             return false;
         }
 
-        vector<nav_msgs::Path> trajectorys_set;
+        vector<vector<Pose_t>> trajectorys_set;
         for (size_t i = 0; i < linear_speed_sample.size(); i++) {
             for (size_t j = 0; j < angular_speed_sample.size(); j++) {
                 trajectorys_set.push_back(GetTrajectory(cur_pose_, 
@@ -145,10 +146,10 @@ public:
             }
         }
         ROS_INFO("Size of trajectory %d", trajectorys_set.size());
-        path_markers.ShowPathMarkers(trajectorys_set);
+        // path_markers.ShowPathMarkers(trajectorys_set);
 
         int best = DistEvaluate(trajectorys_set, global_path);
-        last_trajectory = trajectorys_set[best];
+        // last_trajectory = trajectorys_set[best];
         cur_speed.first = linear_speed_sample[best%linear_speed_sample.size()];
         cur_speed.second = angular_speed_sample[best/linear_speed_sample.size()];
 
