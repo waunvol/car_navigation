@@ -88,11 +88,45 @@ private:
             }
         }
 
-        for (auto trajectory:trajectorys)
+        for (int index_=0; index_<trajectorys.size(); ++index_)
         {
-            std::vector<std::vector<float>> dist_mtr;
-            for (auto pt:trajectory)
+            // cal Dtw distance
+            vector<vector<float>> dist_mtr;
+            for (auto pt:trajectorys[index_])
             {
+                vector<float> dist_array;
+                for (auto pt_g:global_path)
+                {
+                    dist_array.emplace_back(getDist(pt_g, pt));
+                }
+                dist_mtr.emplace_back(dist_array);
+            }
+
+            // calculate the less value form d[0][0] to d[i][j]
+            vector<vector<float>> dp(dist_mtr.size(), vector<float>(dist_mtr[0].size(), DBL_MAX));
+            dp[0][0] = dist_mtr[0][0];
+            for (int i=0; i<dist_mtr.size(); i++)
+            {
+                for (int j=0; j<dist_mtr[i].size(); j++)
+                {
+                    if (i < 1 && j < 1)
+                        continue;
+                    else
+                    {
+                        if (j+1 < dist_mtr[i].size() and dp[i][j+1] < dp[i][j] + dist_mtr[i][j+1])
+                            dp[i][j+1] = dp[i][j] + dist_mtr[i][j+1];
+                        if (i+1 < dist_mtr.size() and dp[i][j+1] < dp[i][j] + dist_mtr[i][j+1])
+                            dp[i+1][j] = dp[i][j] + dist_mtr[i+1][j];
+                        if (j+1 < dist_mtr[i].size() and i+1 < dist_mtr.size()
+                            and dp[i+1][j+1] < dp[i][j] + dist_mtr[i+1][j+1])
+                            dp[i+1][j+1] = dp[i][j] + dist_mtr[i+1][j+1];
+                    }
+                }
+            }
+            if (dp.back().back() < min_score)
+            {
+                index = index_;
+                min_score = dp.back().back();
             }
         }
 
