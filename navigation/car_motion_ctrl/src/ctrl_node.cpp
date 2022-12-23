@@ -58,6 +58,7 @@ int main(int argc, char** argv)
     ros::Subscriber pos_sub = n.subscribe("car_position", 1, UpdatePose);
 
     ros::Publisher speed_pub = n.advertise<geometry_msgs::Twist>("cmd", 1);
+    ros::Publisher local_path_pub = n.advertise<nav_msgs::Path>("local_path", 1);
 
     ros::Rate r(frequency);
     ros::AsyncSpinner spinner(1); // Use another to subscribe position
@@ -95,7 +96,10 @@ int main(int argc, char** argv)
             // path_lock.unlock();
 
             while(!rec_flag.load(std::memory_order_relaxed)) // interrupt when get new goal;
-            {   
+            {
+                if (rec_flag.load(std::memory_order_relaxed))
+                    break;
+
                 if (sqrt(pow(cur_pose.x - global_path.front().x, 2) +
                         pow(cur_pose.y - global_path.front().y, 2)) < tolerance)
                 {
@@ -109,8 +113,10 @@ int main(int argc, char** argv)
                 local_planner.CalculateSpeed(global_path, cur_pose, cur_speed);
                 speed.linear.x = cur_speed.first;
                 speed.angular.z = cur_speed.second;
+                ROS_INFO_THROTTLE(1.0, "Robot current speed: angular %f, linear %f", cur_speed.second, cur_speed.first);
                 // speed_pub.publish(speed);
-                while(1);
+                local_path_pub.publish(local_planner.GetLastTrajectory());
+                ros::spinOnce();
                 r.sleep();
             }
         }
