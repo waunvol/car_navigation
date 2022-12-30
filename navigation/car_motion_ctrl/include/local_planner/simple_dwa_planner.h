@@ -29,13 +29,17 @@ using namespace std;
 
 class DWA_planner {
 private:
-    double max_linear_a=0.5;
+    double max_linear_a=0.2;
     double max_linear_v=1;
-    double max_angular_a=0.78;
+    double max_angular_a=0.2;
     double max_angular_v=1.57;
     int predict_cycle = 5;
     int sample_size = 7;
     double frequency = 0.1;
+
+    const int global_path_simple_size = 6;
+    vector<Pose_t> cur_global_path;     //update while navigation executing.
+
     vector<Pose_t> last_trajectory;
     PathMarkers path_markers = PathMarkers("show_cal_paths");   // for debug
 
@@ -54,50 +58,44 @@ private:
         return trajectory;
     }
 
+    void CutGlobalPath(const Pose_t &cur_pose)
+    {
+        vector<Pose_t> result;
+        // get cloest index
+        double min_dist = DBL_MAX;
+        int min_index;
+        for (int i=0; i<cur_global_path.size(); ++i)
+        {
+            double cur_dist = getDist(cur_pose, cur_global_path[i]);
+            if (cur_dist < min_dist)
+            {
+                min_dist = cur_dist;
+                min_index = i;
+            }
+        }
 
-    int DistEvaluate(const vector<vector<Pose_t>> &trajectorys, const vector<Pose_t> &global_path) {
+        for (int i=0; i<=min_index; ++i)
+        {
+            result.emplace_back(cur_global_path[i]);
+        }
+        cur_global_path = result;
+    }
+
+    int DistEvaluate(const vector<vector<Pose_t>> &trajectorys) {
         //only current or behind global path point can be evaluate, not for front point.
         int index;
 
         // the scorl here just for global path matching.
         double min_score = DBL_MAX;
-        /*
-        for (int i = 0; i < trajectorys.size(); i++) {
-            // each trajectory
-            double cur_score = 0;
-            size_t useful_point_index = global_path.size()-1;
-            for (int j = 0; j < trajectorys[i].size(); j++) {
-                // each trajectory point
-                double min_dist = DBL_MAX;
-                for (int k = useful_point_index; k >= 0; k--) {
-                    // each path point
-                    
-                    double dist = sqrt(pow((trajectorys[i][j].x - global_path[k].x), 2)
-                                         + pow((trajectorys[i][j].y - global_path[k].y), 2));
-                    if (dist < min_dist) {
-                        min_dist = dist;
-                        k-1<=0 ? useful_point_index = 0 : useful_point_index = k-1;
-                    }
-                }
-                
-                cur_score += min_dist;
-            }
-            // ROS_INFO("get a scorll: %f", cur_score);
-            if (min_score > cur_score) {
-                min_score = cur_score;
-                index = i;
-            }
-        }
-        */
 
         for (int index_=0; index_<trajectorys.size(); ++index_) {
             // cal Dtw distance
             vector<vector<double>> dist_mtr;
             for (auto pt:trajectorys[index_]) {
                 vector<double> dist_array;
-                for (int i = global_path.size()-1; i >=0; i--)
-                {
-                    dist_array.emplace_back(getDist(global_path[i], pt));
+                int end_index = max(0, int(cur_global_path.size() - global_path_simple_size));
+                for (int i=cur_global_path.size()-1; i>=end_index; --i) {
+                    dist_array.emplace_back(getDist(cur_global_path[i], pt));
                 }
                 dist_mtr.emplace_back(dist_array);
             }
@@ -121,7 +119,7 @@ private:
                 min_score = dp.back().back();
             }
         }
-
+        ROS_INFO("The best match index is %d of the trajectory set[%d]", index, trajectorys.size());
         return index;
     }
 
@@ -138,7 +136,13 @@ public:
         return PoseArrayToPath(last_trajectory, "world");
     }
 
-    bool CalculateSpeed(const vector<Pose_t> &global_path, const Pose_t &cur_pose_, std::pair<double, double> &cur_speed) {
+    void UpdatePlanning(const vector<Pose_t> &global_path)
+    {
+        ROS_INFO("Receive new path, continue planning.");
+        cur_global_path = global_path;
+    }
+
+    bool CalculateSpeed(const Pose_t &cur_pose_, std::pair<double, double> &cur_speed) {
         /*To do:
         1. cut global path from current pose (provide sample to adjust);
         2. invert global path when cut;
@@ -163,6 +167,8 @@ public:
             return false;
         }
 
+        CutGlobalPath(cur_pose_);
+
         vector<vector<Pose_t>> trajectorys_set;
         for (size_t i = 0; i < linear_speed_sample.size(); i++) {
             for (size_t j = 0; j < angular_speed_sample.size(); j++) {
@@ -171,13 +177,12 @@ public:
                                                         angular_speed_sample[j]));
             }
         }
-        ROS_INFO("Size of trajectory %d", trajectorys_set.size());
         path_markers.ShowPathMarkers(trajectorys_set);
 
-        int best = DistEvaluate(trajectorys_set, global_path);
+        int best = DistEvaluate(trajectorys_set);
         last_trajectory = trajectorys_set[best];
-        cur_speed.first = linear_speed_sample[best%linear_speed_sample.size()];
-        cur_speed.second = angular_speed_sample[best/linear_speed_sample.size()];
+        cur_speed.first = linear_speed_sample[best/(angular_speed_sample.size())];
+        cur_speed.second = angular_speed_sample[best%angular_speed_sample.size()];
 
         return true;
     }

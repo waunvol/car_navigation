@@ -88,7 +88,7 @@ int main(int argc, char** argv)
         {
             
             rec_flag.store(false, std::memory_order_relaxed);
-            ROS_INFO("Navigation start!");
+            local_planner.UpdatePlanning(global_path);
 
             // path_lock.lock();
             // // controller.setGlobalPath(global_path);
@@ -110,11 +110,11 @@ int main(int argc, char** argv)
                     break;
                 }
                 // cur_speed = controller.CalculateValue(cur_pose, cur_speed.first, cur_speed.second);
-                local_planner.CalculateSpeed(global_path, cur_pose, cur_speed);
+                local_planner.CalculateSpeed(cur_pose, cur_speed);
                 speed.linear.x = cur_speed.first;
                 speed.angular.z = cur_speed.second;
                 ROS_INFO_THROTTLE(1.0, "Robot current speed: angular %f, linear %f", cur_speed.second, cur_speed.first);
-                // speed_pub.publish(speed);
+                speed_pub.publish(speed);
                 local_path_pub.publish(local_planner.GetLastTrajectory());
                 ros::spinOnce();
                 r.sleep();
