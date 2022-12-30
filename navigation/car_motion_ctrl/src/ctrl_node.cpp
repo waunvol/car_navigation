@@ -17,6 +17,7 @@ void path_pubRECV(const nav_msgs::Path::ConstPtr msg, std::vector<Pose_t> *path)
 {
     std::lock_guard<std::mutex> lock(path_lock);
     rec_flag.store(true, std::memory_order_relaxed);
+    path->clear();
     Pose_t pt;
     for(int i=0; i<msg->poses.size()-1; ++i) {
         pt.x = msg->poses[i].pose.position.x;
@@ -38,7 +39,7 @@ void UpdatePose(const geometry_msgs::Pose msg) {
     cur_pose.x = msg.position.x;
     cur_pose.y = msg.position.y;
     cur_pose.yaw = tf::getYaw(pose.getRotation());
-    // ROS_INFO("current pose:x %lf, y %lf, yaw %lf", cur_pose.x, cur_pose.y, cur_pose.yaw);
+    ROS_INFO_THROTTLE(1.0, "current pose:x %lf, y %lf, yaw %lf", cur_pose.x, cur_pose.y, cur_pose.yaw);
 }
 
 // global path need process
@@ -86,9 +87,10 @@ int main(int argc, char** argv)
 
         if(rec_flag.load(std::memory_order_relaxed))
         {
-            
+            path_lock.lock();   
             rec_flag.store(false, std::memory_order_relaxed);
             local_planner.UpdatePlanning(global_path);
+            path_lock.unlock();
 
             // path_lock.lock();
             // // controller.setGlobalPath(global_path);

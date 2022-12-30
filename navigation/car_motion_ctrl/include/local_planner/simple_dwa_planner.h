@@ -37,7 +37,7 @@ private:
     int sample_size = 7;
     double frequency = 0.1;
 
-    const int global_path_simple_size = 6;
+    const int global_path_sample_size = 6;
     vector<Pose_t> cur_global_path;     //update while navigation executing.
 
     vector<Pose_t> last_trajectory;
@@ -93,7 +93,7 @@ private:
             vector<vector<double>> dist_mtr;
             for (auto pt:trajectorys[index_]) {
                 vector<double> dist_array;
-                int end_index = max(0, int(cur_global_path.size() - global_path_simple_size));
+                int end_index = max(0, int(cur_global_path.size() - global_path_sample_size));
                 for (int i=cur_global_path.size()-1; i>=end_index; --i) {
                     dist_array.emplace_back(getDist(cur_global_path[i], pt));
                 }
@@ -107,7 +107,7 @@ private:
                 for (int j=0; j<dist_mtr[i].size(); j++) {
                     if (j+1 < dist_mtr[i].size() and dp[i][j+1] > dp[i][j] + dist_mtr[i][j+1])
                         dp[i][j+1] = dp[i][j] + dist_mtr[i][j+1];
-                    if (i+1 < dist_mtr.size() and dp[i][j+1] > dp[i][j] + dist_mtr[i][j+1])
+                    if (i+1 < dist_mtr.size() and dp[i+1][j] > dp[i][j] + dist_mtr[i+1][j])
                         dp[i+1][j] = dp[i][j] + dist_mtr[i+1][j];
                     if (j+1 < dist_mtr[i].size() and i+1 < dist_mtr.size()
                         and dp[i+1][j+1] > dp[i][j] + dist_mtr[i+1][j+1])
@@ -119,7 +119,7 @@ private:
                 min_score = dp.back().back();
             }
         }
-        ROS_INFO("The best match index is %d of the trajectory set[%d]", index, trajectorys.size());
+        // ROS_INFO("The best match index is %d of the trajectory set[%d]", index, trajectorys.size());
         return index;
     }
 
@@ -177,7 +177,7 @@ public:
                                                         angular_speed_sample[j]));
             }
         }
-        path_markers.ShowPathMarkers(trajectorys_set);
+        // path_markers.ShowPathMarkers(trajectorys_set);
 
         int best = DistEvaluate(trajectorys_set);
         last_trajectory = trajectorys_set[best];
