@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     if (not n.getParam("selected_path", PathName))
         PathName = "Dijkstra_path";
     if (not n.getParam("controller_type", controller_type))
-        controller_type = "pid";
+        controller_type = "dwa";
     int frequency = 20;
 
     std::vector<Pose_t> global_path;

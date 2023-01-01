@@ -4,6 +4,7 @@
 #include <math.h>
 #include <tuple>
 #include <vector>
+#include <list>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 #include <nav_msgs/Path.h>
@@ -27,11 +28,12 @@
 
 using namespace std;
 
+typedef std::vector<Pose_t> Path_t;
 class DWA_planner {
 private:
     double max_linear_a=0.2;
     double max_linear_v=1;
-    double max_angular_a=0.2;
+    double max_angular_a=0.4;
     double max_angular_v=1.57;
     int predict_cycle = 5;
     int sample_size = 7;
@@ -39,8 +41,9 @@ private:
 
     const int global_path_sample_size = 6;
     vector<Pose_t> cur_global_path;     //update while navigation executing.
-
     vector<Pose_t> last_trajectory;
+    vector<Path_t> trajectorys_set;
+
     PathMarkers path_markers = PathMarkers("show_cal_paths");   // for debug
 
     // this funtion should match motion model
@@ -81,17 +84,26 @@ private:
         cur_global_path = result;
     }
 
-    int DistEvaluate(const vector<vector<Pose_t>> &trajectorys) {
-        //only current or behind global path point can be evaluate, not for front point.
-        int index;
+    void ObstacleEvaluate()
+    {
+        for (auto it=trajectorys_set.begin(); it!=trajectorys_set.end(); ++it)
+        {
+            if (false/*some funtion to get if collision in this trajectory*/)
+            {
+                trajectorys_set.erase(it);  // delete collision trajectory
+            }
+        }
+    }
+
+    void DistEvaluate(vector<double> &score) {
 
         // the scorl here just for global path matching.
         double min_score = DBL_MAX;
 
-        for (int index_=0; index_<trajectorys.size(); ++index_) {
+        for (int index=0; index<trajectorys_set.size(); ++index) {
             // cal Dtw distance
             vector<vector<double>> dist_mtr;
-            for (auto pt:trajectorys[index_]) {
+            for (auto pt:trajectorys_set[index]) {
                 vector<double> dist_array;
                 int end_index = max(0, int(cur_global_path.size() - global_path_sample_size));
                 for (int i=cur_global_path.size()-1; i>=end_index; --i) {
@@ -114,13 +126,9 @@ private:
                         dp[i+1][j+1] = dp[i][j] + dist_mtr[i+1][j+1];
                 }
             }
-            if (dp.back().back() < min_score) {
-                index = index_;
-                min_score = dp.back().back();
-            }
+            score[index] += dp.back().back();
         }
         // ROS_INFO("The best match index is %d of the trajectory set[%d]", index, trajectorys.size());
-        return index;
     }
 
 public:
@@ -142,12 +150,8 @@ public:
         cur_global_path = global_path;
     }
 
-    bool CalculateSpeed(const Pose_t &cur_pose_, std::pair<double, double> &cur_speed) {
-        /*To do:
-        1. cut global path from current pose (provide sample to adjust);
-        2. invert global path when cut;
-        3. fix evaluate bugs. */
-
+    void CalculateSpeed(const Pose_t &cur_pose_, std::pair<double, double> &cur_speed) {
+        trajectorys_set.clear();
         vector<double> linear_speed_sample, angular_speed_sample;
         double v = cur_speed.first - max_linear_a,
                w = cur_speed.second - max_angular_a;
@@ -164,12 +168,10 @@ public:
         }
 
         if(linear_speed_sample.size()<1 or angular_speed_sample.size()<1){
-            return false;
+            return;
         }
 
         CutGlobalPath(cur_pose_);
-
-        vector<vector<Pose_t>> trajectorys_set;
         for (size_t i = 0; i < linear_speed_sample.size(); i++) {
             for (size_t j = 0; j < angular_speed_sample.size(); j++) {
                 trajectorys_set.push_back(GetTrajectory(cur_pose_, 
@@ -178,13 +180,23 @@ public:
             }
         }
         // path_markers.ShowPathMarkers(trajectorys_set);
+        ObstacleEvaluate();
+        vector<double> trajectory_score(trajectorys_set.size(), 0.0);
+        DistEvaluate(trajectory_score);
+        int best;
+        double min_score = DBL_MAX;
+        for (int i=0; i<trajectory_score.size(); ++i)
+        {
+            if (min_score > trajectory_score[i])
+            {
+                min_score = trajectory_score[i];
+                best = i;
+            }
+        }
 
-        int best = DistEvaluate(trajectorys_set);
         last_trajectory = trajectorys_set[best];
         cur_speed.first = linear_speed_sample[best/(angular_speed_sample.size())];
         cur_speed.second = angular_speed_sample[best%angular_speed_sample.size()];
-
-        return true;
     }
 
     void SetSpeedConfig(double max_lin_v, double max_lin_a, double max_ang_v, double max_ang_a){
