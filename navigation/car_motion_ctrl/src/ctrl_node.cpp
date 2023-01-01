@@ -92,6 +92,8 @@ int main(int argc, char** argv)
         ROS_INFO_THROTTLE(5.0, "current navigation path: %s, current controller: %s", PathName.c_str(), controller_type.c_str());
         if(rec_flag.load(std::memory_order_relaxed))
         {
+            if (not n.getParam("controller_type", controller_type))
+            controller_type = "dwa";
             rec_flag.store(false, std::memory_order_relaxed);
             if (controller_type == "dwa")
             {
