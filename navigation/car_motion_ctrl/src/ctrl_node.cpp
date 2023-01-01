@@ -38,7 +38,7 @@ void UpdatePose(const geometry_msgs::Pose msg) {
     cur_pose.x = msg.position.x;
     cur_pose.y = msg.position.y;
     cur_pose.yaw = tf::getYaw(pose.getRotation());
-    ROS_INFO_THROTTLE(1.0, "current pose:x %lf, y %lf, yaw %lf", cur_pose.x, cur_pose.y, cur_pose.yaw);
+    ROS_INFO_THROTTLE(2.0, "current pose:x %lf, y %lf, yaw %lf", cur_pose.x, cur_pose.y, cur_pose.yaw);
 }
 
 // global path need process
@@ -105,6 +105,10 @@ int main(int argc, char** argv)
                 controller.setGlobalPath(global_path);
                 global_path.clear();
                 path_lock.unlock();
+            }
+            else
+            {
+                ROS_ERROR("Controller type error! Make sure params correct.");
             }
             while(!rec_flag.load(std::memory_order_relaxed)) // interrupt when get new goal;
             {
